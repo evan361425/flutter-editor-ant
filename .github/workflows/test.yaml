@@ -1,0 +1,56 @@
+name: Tests
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches:
+      - master
+    paths:
+      - "lib/**"
+      - "test/**"
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  code-checking:
+    name: Check code format and testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Setup the flutter environment.
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.13.x"
+          cache: true
+          channel: "stable"
+
+      # Get flutter dependencies.
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Statically analyze the Dart code for any errors.
+      - name: Linter
+        run: flutter analyze .
+
+      - name: Format
+        run: make format
+
+      # Run widget tests for our flutter project.
+      - name: Testing
+        if: github.event_name == 'pull_request'
+        run: flutter test --no-pub --no-test-assets
+
+      - name: Testing with Coverage
+        if: github.event_name != 'pull_request'
+        run: flutter test --coverage --no-pub --no-test-assets
+
+      - name: Coverage to codecov
+        if: github.event_name != 'pull_request'
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage/lcov.info
+          slug: evan361425/flutter-spotlight-editor
