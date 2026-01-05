@@ -362,5 +362,22 @@ void main() {
       final textSpans = getTextSpans(tester);
       checkStyles(['He', 'llo', 'World'], [null, const TextStyle(fontWeight: FontWeight.bold), null], textSpans);
     });
+
+    testWidgets('Should correctly render composing text', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
+      await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
+      await tester.pumpAndSettle();
+
+      final controller = getController(tester);
+      controller.value = TextEditingValue(
+        text: 'HelloㄨㄛWorld',
+        composing: const TextRange(start: 5, end: 7),
+        selection: const TextSelection.collapsed(offset: 7),
+      );
+      await tester.pumpAndSettle();
+
+      final textSpans = getTextSpans(tester);
+      expect(textSpans[1].style?.decoration, equals(TextDecoration.underline));
+    });
   });
 }

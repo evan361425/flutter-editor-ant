@@ -53,4 +53,4 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           file: coverage/lcov.info
-          slug: evan361425/flutter-spotlight-editor
+          slug: evan361425/flutter-editor-ant
