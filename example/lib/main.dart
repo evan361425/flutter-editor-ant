@@ -109,7 +109,6 @@ class _EditorState extends State<_Editor> {
         value: _textAlign,
         controller: _textAlignController,
         onSelected: (align) {
-          _textAlign.value = align;
           _focusNode.requestFocus();
         },
       ),

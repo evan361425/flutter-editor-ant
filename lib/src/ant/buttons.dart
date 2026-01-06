@@ -335,13 +335,13 @@ class TextAlignSelector extends StatelessWidget {
   final ValueNotifier<TextAlign> value;
   final MenuController controller;
   final String tooltip;
-  final void Function(TextAlign) onSelected;
+  final void Function(TextAlign)? onSelected;
 
   const TextAlignSelector({
     super.key,
     required this.value,
     required this.controller,
-    required this.onSelected,
+    this.onSelected,
     this.tooltip = 'Text Alignment',
   });
 
@@ -373,7 +373,8 @@ class TextAlignSelector extends StatelessWidget {
                   // executed.
                   SchedulerBinding.instance.addPostFrameCallback((Duration _) {
                     FocusManager.instance.applyFocusChangesIfNeeded();
-                    onSelected(alignment);
+                    value.value = alignment;
+                    onSelected?.call(alignment);
                   });
                   controller.close();
                 },
