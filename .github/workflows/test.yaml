@@ -30,7 +30,9 @@ jobs:
 
       # Get flutter dependencies.
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          flutter clean
+          flutter pub get
 
       # Statically analyze the Dart code for any errors.
       - name: Linter
