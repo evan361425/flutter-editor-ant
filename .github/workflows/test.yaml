@@ -25,13 +25,13 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.38.x"
-          cache: false
+          cache: true
           channel: "stable"
 
       # Get flutter dependencies.
       - name: Install dependencies
         run: |
-          flutter clean
+          flutter precache --universal --shaders
           flutter pub get
 
       # Statically analyze the Dart code for any errors.
