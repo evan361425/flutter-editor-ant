@@ -1,39 +1,103 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+<!-- <a href="https://evan361425.github.io/flutter-spotlight-ant/">
+  <h1 align="center">
+    <img alt="SpotlightAnt" src="https://raw.githubusercontent.com/evan361425/flutter-spotlight-ant/master/docs/spotlight-ant.png">
+  </h1>
+</a> -->
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+[![codecov](https://codecov.io/gh/evan361425/flutter-editor-ant/branch/master/graph/badge.svg?token=kLLR8QWK9l)](https://codecov.io/gh/evan361425/flutter-editor-ant)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/003d6ab544314dee887aa57631e856c9)](https://www.codacy.com/gh/evan361425/flutter-editor-ant/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=evan361425/flutter-editor-ant&amp;utm_campaign=Badge_Grade)
+[![Pub Version](https://img.shields.io/pub/v/editor_ant)](https://pub.dev/packages/editor_ant)
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+`EditorAnt` provide simple interface and demo widgets to create styled editor.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+> This package is separated from my project [POS-System](https://github.com/evan361425/flutter-pos-system).
 
-## Features
+Play it yourself by visiting the [online demo page](https://evan361425.github.io/flutter-editor-ant/)!
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+> See more details in [example](example/README.md).
 
-## Getting started
+## Installation
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+```bash
+flutter pub add editor_ant
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+The main widget `StyledEditingController` provide a method `addStyle` to apply
+custom style in editing text.
 
 ```dart
-const like = 'sample';
+_controller = StyledEditingController<StyledText>();
+TextField(
+  controller: _controller,
+  decoration: const InputDecoration.collapsed(hintText: 'Start typing...'),
+);
 ```
 
-## Additional information
+Above `StyledText` is a demo styling instructor, below is a simplified implements:
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```dart
+class StyledText extends StyledRange<StyledText> {
+  final bool isBold;
+
+  StyledText({
+    required super.range,
+    this.isBold = false,
+  });
+
+  @override
+  StyledText copyWith({
+    int? start,
+    int? end,
+    StyledText? other,
+    bool toggle = false,
+    bool isBold = false,
+  }) {
+    return StyledText(
+      range: TextRange(start: start ?? range.start, end: end ?? range.end),
+      isBold: isBold
+          ? true
+          : other?.isBold == true
+          ? (!this.isBold || !toggle)
+          : this.isBold,
+    );
+  }
+
+  @override
+  bool hasSameToggleState(StyledText other) {
+    if (other.isBold) {
+      return isBold;
+    }
+    return false;
+  }
+
+  @override
+  // use for change notifier
+  bool operator ==(Object other) {
+    return other is StyledText &&
+        isBold == other.isBold;
+  }
+
+  @override
+  TextStyle toTextStyle() {
+    return TextStyle(
+      fontWeight: isBold ? FontWeight.bold : null,
+    );
+  }
+
+  @override
+  int get hashCode => Object.hash(range, isBold);
+}
+```
+
+And now you can use the toggled bold style in the menu bar.
+
+```dart
+IconButton(
+  icon: const Icon(Icons.format_bold),
+  onPressed: () {
+    _controller.addStyle(StyledText(range: _controller.selection, isBold: true));
+  },
+)
+```
