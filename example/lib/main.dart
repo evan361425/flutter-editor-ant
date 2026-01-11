@@ -16,7 +16,8 @@ class MyApp extends StatelessWidget {
       valueListenable: brightness,
       builder: (context, value, child) {
         return MaterialApp(
-          theme: ThemeData(useMaterial3: true, brightness: value),
+          // use splashFactory to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
+          theme: ThemeData(useMaterial3: true, brightness: value, splashFactory: InkRipple.splashFactory),
           home: Scaffold(
             appBar: AppBar(title: const Text('EditorAnt Example')),
             body: const _Editor(),
