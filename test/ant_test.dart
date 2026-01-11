@@ -104,6 +104,7 @@ void main() {
       final styledEditingController = StyledEditingController<StyledText>();
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(splashFactory: InkRipple.splashFactory),
           home: Scaffold(
             body: SizedBox(
               width: 100,
@@ -137,6 +138,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(splashFactory: InkRipple.splashFactory),
           home: Scaffold(
             body: SizedBox.fromSize(
               size: const Size(300, 100),
