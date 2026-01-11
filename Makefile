@@ -37,7 +37,7 @@ bump: install-bumper ## Bump version
 	bumper \
 		--hook-repl[]paths[]=pubspec.yaml \
 		--'hook-repl[]pattern=^version: \d+\.\d+\.\d+' \
-		--'hook-repl[]repl-v=version: {version.noPrefix}'
+		--'hook-repl[]repl-v=version: {"version".noPrefix}'
 
 ##@ Tools
 .PHONY: install-bumper
