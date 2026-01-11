@@ -31,7 +31,7 @@ jobs:
       # Get flutter dependencies.
       - name: Install dependencies
         run: |
-          flutter precache --universal --shaders
+          flutter precache --universal
           flutter pub get
 
       # Statically analyze the Dart code for any errors.
