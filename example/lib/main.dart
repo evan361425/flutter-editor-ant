@@ -16,8 +16,8 @@ class MyApp extends StatelessWidget {
       valueListenable: brightness,
       builder: (context, value, child) {
         return MaterialApp(
-          // use splashFactory to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
-          theme: ThemeData(useMaterial3: false, brightness: value, splashFactory: InkRipple.splashFactory),
+          // use material 2 to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
+          theme: ThemeData(useMaterial3: false, brightness: value),
           home: Scaffold(
             appBar: AppBar(title: const Text('EditorAnt Example')),
             body: const _Editor(),

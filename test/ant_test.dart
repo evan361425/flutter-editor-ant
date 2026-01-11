@@ -80,7 +80,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
+          theme: ThemeData(splashFactory: InkRipple.splashFactory),
           home: Scaffold(
             body: SizedBox(
               width: 100,
