@@ -80,6 +80,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             body: SizedBox(
               width: 100,
@@ -89,6 +90,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.format_bold));
       await tester.pumpAndSettle();
 
