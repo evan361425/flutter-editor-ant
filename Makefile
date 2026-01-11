@@ -22,35 +22,22 @@ test-coverage: ## Run tests with coverage
 build-example: ## Compile for GithHub Pages
 	cd example && \
 		flutter build web --release \
-		--base-href "/flutter-spotlight-ant/"
+		--base-href "/flutter-editor-ant/"
 
 .PHONY: serve-example
 serve-example: ## Serve example in local
-	@if [ ! -d example/build/flutter-spotlight-ant ]; then \
-		mv example/build/web example/build/flutter-spotlight-ant; \
+	@if [ ! -d example/build/flutter-editor-ant ]; then \
+		mv example/build/web example/build/flutter-editor-ant; \
 	fi
 	cd example/build && python3 -m http.server
 
 ##@ Build
 .PHONY: bump
 bump: install-bumper ## Bump version
-	@current=$$(grep '^version:' pubspec.yaml | head -n1 | cut -d' ' -f2); \
-	read -p "Enter new version (current is $$current): " version; \
-	if [[ ! $$version =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
-		echo "Version must be in x.x.x format"; \
-		exit 1; \
-	fi; \
-	if [[ $$(echo -e "$$version\n$$current" | sort -V | head -n1) == $$version ]]; then \
-		echo "Version must be above $$current"; \
-		exit 1; \
-	fi; \
-	sed -i.bk '3s/version: *.*.*/version: '$$version'/' pubspec.yaml; \
-	rm pubspec.yaml.bk; \
-	bumper --latestVersion=v$$version \
-		--repoLink https://github.com/evan361425/flutter-spotlight-ant \
-		--tagNames production \
-		--tagPatterns 'v[0-9]+.[0-9]+.[0-9]+$$' \
-		--changelogTemplate '{content}'
+	bumper \
+		--hook-repl[]paths[]=pubspec.yaml \
+		--'hook-repl[]pattern=^version: \d+\.\d+\.\d+' \
+		--'hook-repl[]repl-v=version: {version.noPrefix}'
 
 ##@ Tools
 .PHONY: install-bumper

@@ -8,7 +8,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/003d6ab544314dee887aa57631e856c9)](https://www.codacy.com/gh/evan361425/flutter-editor-ant/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=evan361425/flutter-editor-ant&amp;utm_campaign=Badge_Grade)
 [![Pub Version](https://img.shields.io/pub/v/editor_ant)](https://pub.dev/packages/editor_ant)
 
-`EditorAnt` provide simple interface and demo widgets to create styled editor.
+`EditorAnt` provide simple interface and demo widgets to create rich text editor.
 
 > This package is separated from my project [POS-System](https://github.com/evan361425/flutter-pos-system).
 
