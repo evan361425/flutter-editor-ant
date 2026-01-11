@@ -2,25 +2,34 @@ import 'package:editor_ant/editor_ant.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MyApp(fromTest: false));
 }
 
 class MyApp extends StatelessWidget {
-  static final ValueNotifier<Brightness> brightness = ValueNotifier(Brightness.light);
+  final bool fromTest;
 
-  const MyApp({super.key});
+  static final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.system);
+
+  const MyApp({super.key, this.fromTest = true});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: brightness,
+      valueListenable: themeMode,
       builder: (context, value, child) {
         return MaterialApp(
           // use material 2 to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
-          theme: ThemeData(useMaterial3: false, brightness: value),
+          theme: ThemeData.light(useMaterial3: !fromTest),
+          darkTheme: ThemeData.dark(useMaterial3: !fromTest),
+          themeMode: value,
           home: Scaffold(
-            appBar: AppBar(title: const Text('EditorAnt Example')),
-            body: const _Editor(),
+            body: Stack(
+              children: [
+                if (!fromTest)
+                  Center(child: SizedBox.square(dimension: 256, child: Image.asset('assets/editor-ant.png'))),
+                _Editor(),
+              ],
+            ),
           ),
         );
       },
@@ -116,12 +125,12 @@ class _EditorState extends State<_Editor> {
       // Other settings
       const Spacer(),
       ToggleableButton(
-        value: MyApp.brightness,
+        value: MyApp.themeMode,
         icon: Icon(Icons.dark_mode_outlined),
         onPressed: () {
-          MyApp.brightness.value = MyApp.brightness.value == Brightness.light ? Brightness.dark : Brightness.light;
+          MyApp.themeMode.value = MyApp.themeMode.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
         },
-        predicate: (brightness) => brightness == Brightness.dark,
+        predicate: (themeMode) => themeMode == ThemeMode.dark,
       ),
     ];
   }
