@@ -1,7 +1,7 @@
 name: editor_ant
 package: editor_ant
 description: Simple rich text editor with easy to use API.
-version: 0.1.0
+version: {version.noPrefix}
 repository: https://github.com/evan361425/flutter-editor-ant
 
 environment:

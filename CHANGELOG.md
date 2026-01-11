@@ -8,8 +8,17 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v0.1.1] - 2026-01-11
+
+### Fixed
+
+- ([4b44551](https://github.com/evan361425/flutter-editor-ant/commit/4b4455123a8c807b2648fe30dd12408e28486a7f)) fix bump - @wu0dj2k7ao3
+- ([6bf04e7](https://github.com/evan361425/flutter-editor-ant/commit/6bf04e763db8b8aa6f0df777f8e2a47bdb51bb98)) fix bump - @wu0dj2k7ao3
+
 ## [v1.0.0] - 2026-01
 
 Initial release
 
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v0.1.1...HEAD
+[v0.1.1]: https://github.com/evan361425/flutter-editor-ant/compare/v0.1.0...v0.1.1
 [v1.0.0]: https://github.com/evan361425/flutter-editor-ant/releases/v1.0.0
