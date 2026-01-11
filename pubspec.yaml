@@ -1,7 +1,8 @@
 name: editor_ant
-description: "A new Flutter package project."
+package: editor_ant
+description: Simple rich text editor with easy to use API.
 version: 0.1.0
-homepage:
+repository: https://github.com/evan361425/flutter-spotlight-ant
 
 environment:
   sdk: ^3.9.2

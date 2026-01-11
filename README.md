@@ -1,6 +1,6 @@
 <a href="https://evan361425.github.io/flutter-editor-ant/">
   <h1 align="center">
-    <img alt="EditorAnt" src="https://raw.githubusercontent.com/evan361425/flutter-editor-ant/master/docs/editor-ant.png">
+    <img alt="EditorAnt" src="https://raw.githubusercontent.com/evan361425/flutter-editor-ant/master/doc/editor-ant.png">
   </h1>
 </a>
 
