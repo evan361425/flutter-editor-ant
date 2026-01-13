@@ -101,8 +101,8 @@ class _EditorState extends State<_Editor> {
         value: _controller.activeStyle,
         controller: _colorController,
         colors: [
-          [Colors.black, Colors.grey[800]!, Colors.grey[700]!, Colors.grey[500]!],
-          [Colors.grey[300]!, Colors.grey[200]!, Colors.grey[100]!, Colors.white],
+          [Colors.black87, Colors.white, Colors.red, Colors.orange],
+          [Colors.yellow, Colors.green, Colors.blue, Colors.purple],
         ],
         styledEditingController: _controller,
         propagateTo: _focusNode,

@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 /// Default font size used in [StyledText]
 const int defaultFontSize = 16;
 
-/// Default font color used in [StyledText]
-const Color defaultFontColor = Colors.black87;
-
 /// StyledText represents a range of text with specific styles applied.
 class StyledText extends StyledRange<StyledText> {
   /// Whether the text is bold.

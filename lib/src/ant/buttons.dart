@@ -270,6 +270,7 @@ class ColorSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int i = 0;
+    final defaultColor = Theme.of(context).textTheme.bodyMedium?.color ?? Theme.of(context).colorScheme.onSurface;
     return MenuAnchor(
       controller: controller,
       builder: (context, controller, child) => ValueListenableBuilder(
@@ -286,7 +287,7 @@ class ColorSelector extends StatelessWidget {
                   child: ColoredBox(
                     color: Colors.grey[200]!,
                     child: ColoredBox(
-                      color: value?.color ?? defaultFontColor,
+                      color: value?.color ?? defaultColor,
                       child: SizedBox(height: 5, width: double.infinity),
                     ),
                   ),
