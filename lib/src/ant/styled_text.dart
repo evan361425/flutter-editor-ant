@@ -115,6 +115,7 @@ class StyledText extends StyledRange<StyledText> {
         if (isStrikethrough) TextDecoration.lineThrough,
         if (isUnderline) TextDecoration.underline,
       ]),
+      decorationColor: color,
       fontSize: fontSize?.toDouble(),
       color: color,
     );
