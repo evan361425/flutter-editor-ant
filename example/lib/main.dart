@@ -22,17 +22,34 @@ class MyApp extends StatelessWidget {
           theme: ThemeData.light(useMaterial3: !fromTest),
           darkTheme: ThemeData.dark(useMaterial3: !fromTest),
           themeMode: value,
-          home: Scaffold(
-            body: Stack(
-              children: [
-                if (!fromTest)
-                  Center(child: SizedBox.square(dimension: 256, child: Image.asset('assets/editor-ant.png'))),
-                _Editor(),
-              ],
-            ),
-          ),
+          home: Scaffold(body: _buildBody(context)),
         );
       },
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    if (fromTest) return _Editor();
+
+    return Center(
+      child: SizedBox(
+        width: 600,
+        height: 650,
+        child: Stack(
+          children: [
+            Card(child: _Editor()),
+            Positioned(
+              bottom: 32,
+              left: 0,
+              right: 0,
+              child: Opacity(
+                opacity: 0.8,
+                child: SizedBox.square(dimension: 200, child: Image.asset('assets/editor-ant.png')),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -71,9 +88,11 @@ class _EditorState extends State<_Editor> {
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerHigh,
             border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
           ),
           height: 49,
-          child: Row(spacing: 2.0, children: _buildToolbarButtons()),
+          width: double.infinity,
+          child: Row(children: _buildToolbarButtons()),
         ),
         // Editor
         Expanded(
@@ -90,40 +109,49 @@ class _EditorState extends State<_Editor> {
 
   List<Widget> _buildToolbarButtons() {
     return [
-      FontSizeField(
-        key: const Key('editor_ant.font_size_field'),
-        controller: _fontSizeController,
-        focusNode: _fontSizeFocusNode,
-        styledEditingController: _controller,
-        propagateTo: _focusNode,
+      Expanded(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            spacing: 2.0,
+            children: [
+              FontSizeField(
+                key: const Key('editor_ant.font_size_field'),
+                controller: _fontSizeController,
+                focusNode: _fontSizeFocusNode,
+                styledEditingController: _controller,
+                propagateTo: _focusNode,
+              ),
+              ColorSelector(
+                value: _controller.activeStyle,
+                controller: _colorController,
+                colors: [
+                  [Colors.black87, Colors.white, Colors.red, Colors.orange],
+                  [Colors.yellow, Colors.green, Colors.blue, Colors.purple],
+                ],
+                styledEditingController: _controller,
+                propagateTo: _focusNode,
+              ),
+              // Style buttons
+              VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
+              BoldButton(value: _controller.activeStyle, shortcut: _bold),
+              ItalicButton(value: _controller.activeStyle, shortcut: _italic),
+              StrikethroughButton(value: _controller.activeStyle, shortcut: _strikethrough),
+              UnderlineButton(value: _controller.activeStyle, shortcut: _underline),
+              // Paragraph styles
+              VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
+              TextAlignSelector(
+                value: _textAlign,
+                controller: _textAlignController,
+                onSelected: (align) {
+                  _focusNode.requestFocus();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
-      ColorSelector(
-        value: _controller.activeStyle,
-        controller: _colorController,
-        colors: [
-          [Colors.black87, Colors.white, Colors.red, Colors.orange],
-          [Colors.yellow, Colors.green, Colors.blue, Colors.purple],
-        ],
-        styledEditingController: _controller,
-        propagateTo: _focusNode,
-      ),
-      // Style buttons
-      VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-      BoldButton(value: _controller.activeStyle, shortcut: _bold),
-      ItalicButton(value: _controller.activeStyle, shortcut: _italic),
-      StrikethroughButton(value: _controller.activeStyle, shortcut: _strikethrough),
-      UnderlineButton(value: _controller.activeStyle, shortcut: _underline),
-      // Paragraph styles
-      VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-      TextAlignSelector(
-        value: _textAlign,
-        controller: _textAlignController,
-        onSelected: (align) {
-          _focusNode.requestFocus();
-        },
-      ),
-      // Other settings
-      const Spacer(),
+      VerticalDivider(width: 2, thickness: 2, indent: 2, endIndent: 2),
       ToggleableButton(
         value: MyApp.themeMode,
         icon: Icon(Icons.dark_mode_outlined),
