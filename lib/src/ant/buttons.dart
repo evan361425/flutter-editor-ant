@@ -270,7 +270,7 @@ class ColorSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int i = 0;
-    final defaultColor = Theme.of(context).textTheme.bodyMedium?.color ?? Theme.of(context).colorScheme.onSurface;
+    final defaultColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black87;
     return MenuAnchor(
       controller: controller,
       builder: (context, controller, child) => ValueListenableBuilder(
