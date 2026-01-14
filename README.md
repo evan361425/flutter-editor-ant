@@ -101,3 +101,19 @@ IconButton(
   },
 )
 ```
+
+### Undo/Redo Support
+
+The controller supports undo/redo for styling changes:
+
+```dart
+// Check if undo/redo is available
+bool canUndo = _controller.canUndo();
+bool canRedo = _controller.canRedo();
+
+// Undo/redo styling changes
+_controller.undo();
+_controller.redo();
+```
+
+See [doc/undo_redo.md](doc/undo_redo.md) for detailed usage examples.
