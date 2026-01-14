@@ -8,9 +8,21 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
   final List<T> styles = [];
   ValueNotifier<T?> activeStyle = ValueNotifier<T?>(null);
 
+  /// History stack for undo operations
+  final List<List<T>> _history = [];
+
+  /// Index of current position in history (-1 means no history)
+  int _historyIndex = -1;
+
+  /// Flag to prevent recording history during undo/redo operations
+  bool _isUndoRedoInProgress = false;
+
   StyledEditingController({super.text}) {
     _previousText = text;
     addListener(_onChanged);
+    // Initialize history with empty state
+    _history.add([]);
+    _historyIndex = 0;
   }
 
   @override
@@ -65,6 +77,11 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         logging(activeStyle.value!.toString(), 'Collapse');
       }
       return;
+    }
+
+    // Save history before making changes
+    if (!inProcess && !_isUndoRedoInProgress) {
+      _saveHistory();
     }
 
     final range = _getOverlapRange(other.range);
@@ -353,5 +370,80 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       logging('Null', 'Active');
     }
     activeStyle.value = null;
+  }
+
+  /// Save the current state to history for undo/redo
+  void _saveHistory() {
+    if (_isUndoRedoInProgress) {
+      return;
+    }
+
+    // Remove any redo history when a new change is made
+    if (_historyIndex < _history.length - 1) {
+      _history.removeRange(_historyIndex + 1, _history.length);
+    }
+
+    // Create a deep copy of the current styles
+    final snapshot = styles.map((style) => style.copyWith() as T).toList();
+    _history.add(snapshot);
+    _historyIndex = _history.length - 1;
+
+    if (EditorAntConfig.enableLogging) {
+      logging('History saved at index $_historyIndex', 'History');
+    }
+  }
+
+  /// Check if undo is available
+  bool canUndo() {
+    return _historyIndex > 0;
+  }
+
+  /// Check if redo is available
+  bool canRedo() {
+    return _historyIndex < _history.length - 1;
+  }
+
+  /// Undo the last styling change
+  void undo() {
+    if (!canUndo()) {
+      return;
+    }
+
+    _isUndoRedoInProgress = true;
+    _historyIndex--;
+
+    // Restore the previous state
+    styles.clear();
+    styles.addAll(_history[_historyIndex].map((style) => style.copyWith() as T));
+
+    if (EditorAntConfig.enableLogging) {
+      logging('Restored history at index $_historyIndex', 'Undo');
+    }
+
+    _resetActiveStyle();
+    notifyListeners();
+    _isUndoRedoInProgress = false;
+  }
+
+  /// Redo the last undone styling change
+  void redo() {
+    if (!canRedo()) {
+      return;
+    }
+
+    _isUndoRedoInProgress = true;
+    _historyIndex++;
+
+    // Restore the next state
+    styles.clear();
+    styles.addAll(_history[_historyIndex].map((style) => style.copyWith() as T));
+
+    if (EditorAntConfig.enableLogging) {
+      logging('Restored history at index $_historyIndex', 'Redo');
+    }
+
+    _resetActiveStyle();
+    notifyListeners();
+    _isUndoRedoInProgress = false;
   }
 }
