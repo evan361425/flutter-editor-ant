@@ -206,8 +206,8 @@ void main() {
           [
             null,
             const TextStyle(decoration: TextDecoration.underline),
-            const TextStyle(decoration: TextDecoration.underline, color: Colors.black),
-            const TextStyle(color: Colors.black),
+            const TextStyle(decoration: TextDecoration.underline, decorationColor: Colors.black87, color: Colors.black87),
+            const TextStyle(color: Colors.black87),
           ],
           textSpans,
         );
