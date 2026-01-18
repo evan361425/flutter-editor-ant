@@ -1,8 +1,9 @@
 import 'package:editor_ant/editor_ant.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
   EditorAntConfig.enableLogging = true;
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp(fromTest: false));
 }
 
@@ -20,8 +21,8 @@ class MyApp extends StatelessWidget {
       builder: (context, value, child) {
         return MaterialApp(
           // use material 2 to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
-          theme: ThemeData.light(useMaterial3: !fromTest),
-          darkTheme: ThemeData.dark(useMaterial3: !fromTest),
+          theme: ThemeData(useMaterial3: !fromTest, brightness: Brightness.light, fontFamily: 'Noto Sans TC'),
+          darkTheme: ThemeData(useMaterial3: !fromTest, brightness: Brightness.dark, fontFamily: 'Noto Sans TC'),
           themeMode: value,
           home: Scaffold(body: _buildBody(context)),
         );
