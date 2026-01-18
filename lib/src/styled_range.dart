@@ -55,6 +55,10 @@ abstract class StyledRange<T extends StyledRange<T>> {
   /// - [toggle]: If true and both this and [other] have the same toggle state, it will invert the state
   T copyWith({int? start, int? end, T? other, bool toggle = false});
 
+  /// Combine this range with another range, return true only if both ranges
+  /// have the same toggle state
+  T combine(T other);
+
   /// Check if this range has the same toggle state (e.g. bold) as another range
   bool hasSameToggleState(T other);
 

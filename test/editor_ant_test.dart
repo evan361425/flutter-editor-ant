@@ -350,7 +350,6 @@ void main() {
         getTextSpans(tester),
       );
     });
-
     testWidgets('Active style is in range and add collapsed style', (WidgetTester tester) async {
       await tester.pumpWidget(MyApp());
       await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
@@ -366,7 +365,6 @@ void main() {
       final textSpans = getTextSpans(tester);
       checkStyles(['He', 'llo', 'World'], [null, const TextStyle(fontWeight: FontWeight.bold), null], textSpans);
     });
-
     testWidgets('Should correctly render composing text', (WidgetTester tester) async {
       await tester.pumpWidget(MyApp());
       await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
@@ -382,6 +380,24 @@ void main() {
 
       final textSpans = getTextSpans(tester);
       expect(textSpans[1].style?.decoration, equals(TextDecoration.underline));
+    });
+    testWidgets('Active style should combine both styles', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
+      await tester.tap(find.byIcon(Icons.format_bold));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
+      await tester.pumpAndSettle();
+
+      final controller = getController(tester);
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
+      await tester.tap(find.byIcon(Icons.format_italic));
+      await tester.pumpAndSettle();
+
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 10);
+      final style = controller.activeStyle.value;
+      expect(style, isA<StyledText>());
+      expect((style as StyledText).isBold, isTrue);
+      expect(style.isItalic, isFalse);
     });
   });
 }

@@ -335,14 +335,40 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     // Use the styles in the selected range to determine the active style.
     final start = selection.isCollapsed ? selection.start : selection.start + 1;
 
+    final List<T> checkStyles = [];
     for (final style in styles) {
-      // we only use style before the cursor
-      if (start > style.range.start && selection.end <= style.range.end) {
-        activeStyle.value = style;
-        if (EditorAntConfig.enableLogging) {
-          logging(activeStyle.value.toString(), 'Active');
+      // check connected styles
+      if (checkStyles.isNotEmpty) {
+        final last = checkStyles.last;
+        if (style.range.start == last.range.end) {
+          checkStyles.add(style);
+          // finally setup active style from multiple connected styles
+          if (selection.end <= style.range.end) {
+            activeStyle.value = checkStyles.reduce((value, element) {
+              return value.combine(element);
+            });
+            if (EditorAntConfig.enableLogging) {
+              logging('Merged: ${activeStyle.value}', 'Active');
+            }
+            return;
+          }
+        } else {
+          break;
         }
-        return;
+      }
+
+      // we only use style before the cursor, if selection end is after style
+      // end, then selection may cross multiple styles, we add [checkStyles].
+      if (start > style.range.start) {
+        if (selection.end > style.range.end) {
+          checkStyles.add(style);
+        } else {
+          activeStyle.value = style;
+          if (EditorAntConfig.enableLogging) {
+            logging(activeStyle.value.toString(), 'Active');
+          }
+          return;
+        }
       }
       if (style.range.start > selection.end) {
         break;

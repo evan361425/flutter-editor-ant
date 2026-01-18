@@ -74,6 +74,18 @@ class StyledText extends StyledRange<StyledText> {
     );
   }
 
+  StyledText combine(StyledText other) {
+    return StyledText(
+      range: TextRange(start: range.start, end: other.range.end),
+      isBold: isBold && other.isBold,
+      isItalic: isItalic && other.isItalic,
+      isStrikethrough: isStrikethrough && other.isStrikethrough,
+      isUnderline: isUnderline && other.isUnderline,
+      fontSize: fontSize == other.fontSize && fontSize != null ? fontSize : null,
+      color: color == other.color && color != null ? color : null,
+    );
+  }
+
   @override
   bool hasSameToggleState(StyledText other) {
     if (other.isBold) {
