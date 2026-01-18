@@ -74,6 +74,7 @@ class StyledText extends StyledRange<StyledText> {
     );
   }
 
+  @override
   StyledText combine(StyledText other) {
     return StyledText(
       range: TextRange(start: range.start, end: other.range.end),

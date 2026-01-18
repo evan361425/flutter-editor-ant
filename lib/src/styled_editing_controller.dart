@@ -359,7 +359,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
 
       // we only use style before the cursor, if selection end is after style
       // end, then selection may cross multiple styles, we add [checkStyles].
-      if (start > style.range.start) {
+      if (start > style.range.start && start <= style.range.end) {
         if (selection.end > style.range.end) {
           checkStyles.add(style);
         } else {

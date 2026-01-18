@@ -2,6 +2,7 @@ import 'package:editor_ant/editor_ant.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  EditorAntConfig.enableLogging = true;
   runApp(const MyApp(fromTest: false));
 }
 
@@ -44,7 +45,10 @@ class MyApp extends StatelessWidget {
               right: 0,
               child: Opacity(
                 opacity: 0.8,
-                child: SizedBox.square(dimension: 200, child: Image.asset('assets/editor-ant.png')),
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: SizedBox.square(dimension: 200, child: Image.asset('assets/editor-ant.png')),
+                ),
               ),
             ),
           ],
@@ -100,7 +104,7 @@ class _EditorState extends State<_Editor> {
             padding: const EdgeInsets.all(16),
             width: double.infinity,
             height: double.infinity,
-            child: SingleChildScrollView(child: _buildTextField()),
+            child: _buildTextField(),
           ),
         ),
       ],
@@ -188,6 +192,7 @@ class _EditorState extends State<_Editor> {
               textAlign: value,
               autofocus: true,
               maxLines: null,
+              minLines: null,
               decoration: const InputDecoration.collapsed(hintText: 'Start typing...'),
             );
           },
