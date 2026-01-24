@@ -29,13 +29,13 @@ class ItalicIntent extends StyledIntent<StyledText> {
   }
 }
 
-/// Intent for strikethrough style, use `shift + s`
+/// Intent for strikethrough style, use `shift + x`
 class StrikethroughIntent extends StyledIntent<StyledText> {
   const StrikethroughIntent({required super.activator, required super.styler});
 
   factory StrikethroughIntent.basic() {
     return StrikethroughIntent(
-      activator: _activatorWithCmdOrCtrl(LogicalKeyboardKey.keyS, shift: true),
+      activator: _activatorWithCmdOrCtrl(LogicalKeyboardKey.keyX, shift: true),
       styler: (range) => StyledText(range: range).copyWith(isStrikethrough: true),
     );
   }

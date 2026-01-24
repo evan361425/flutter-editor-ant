@@ -64,8 +64,8 @@ class StyledText extends StyledRange<StyledText> {
       isItalic: other.isItalic ? !isItalic || !toggle : isItalic,
       isStrikethrough: other.isStrikethrough ? !isStrikethrough || !toggle : isStrikethrough,
       isUnderline: other.isUnderline ? !isUnderline || !toggle : isUnderline,
-      fontSize: fontSize,
-      color: color,
+      fontSize: fontSize ?? other.fontSize,
+      color: color ?? other.color,
     );
   }
 
