@@ -287,6 +287,29 @@ void main() {
       expect(controller.selection.start, equals(2));
       expect(controller.selection.end, equals(5));
     });
+    testWidgets('Inside two styled text will be ok to toggle single style', (tester) async {
+      await tester.pumpWidget(MyApp());
+      await tester.tap(find.byIcon(Icons.format_bold));
+      await tester.tap(find.byIcon(Icons.format_italic));
+      await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
+      await tester.pumpAndSettle();
+
+      final controller = getController(tester);
+      controller.selection = const TextSelection(baseOffset: 3, extentOffset: 8);
+      await tester.tap(find.byIcon(Icons.format_bold));
+      await tester.pumpAndSettle();
+
+      final textSpans = getTextSpans(tester);
+      checkStyles(
+        ['Hel', 'loWor', 'ld'],
+        [
+          const TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),
+          const TextStyle(fontStyle: FontStyle.italic),
+          const TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),
+        ],
+        textSpans,
+      );
+    });
   });
 
   group('Fulfill test coverage', () {

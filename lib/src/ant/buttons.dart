@@ -1,45 +1,33 @@
-import 'package:editor_ant/src/ant/shortcut.dart';
-import 'package:editor_ant/src/ant/styled_text.dart';
-import 'package:editor_ant/src/styled_editing_controller.dart';
-import 'package:editor_ant/src/styled_range.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../styled_editing_controller.dart';
+import '../styled_range.dart';
+import '../styled_wrapper.dart';
+import 'intents.dart';
+import 'styled_text.dart';
+
 /// Simple button to toggle bold style in [StyledText]
 class BoldButton extends StatelessWidget {
   final ValueNotifier<StyledText?> value;
-  final Shortcut? shortcut;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const BoldButton({super.key, required this.value, this.shortcut, this.onPressed, this.tooltip = 'Bold'});
-
-  /// Create a [Shortcut] for bold action
-  static Shortcut createShortcut({
-    VoidCallback? onPressed,
-    StyledEditingController<StyledText>? controller,
-    FocusNode? propagateTo,
-  }) {
-    return Shortcut.withCmdOrCtrl(
-      intent: const BoldIntent(),
-      onInvoke: _getShortcutCallback(
-        onPressed: onPressed,
-        controller: controller,
-        propagateTo: propagateTo,
-        styler: (style) => style.copyWith(isBold: true),
-      ),
-    );
-  }
+  const BoldButton({super.key, required this.value, this.onPressed, this.tooltip = 'Bold'});
 
   @override
   Widget build(BuildContext context) {
+    final intent = StyledWrapper.maybeOf(context)?.getIntent(BoldIntent);
     return ToggleableButton(
       value: value,
       icon: const Icon(Icons.format_bold),
-      tooltip: shortcut?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
+      tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isBold,
-      onPressed: shortcut?.onInvoke ?? onPressed!,
+      onPressed: () {
+        StyledWrapper.maybeOf(context)?.getInvoker(BoldIntent)();
+        onPressed?.call();
+      },
     );
   }
 }
@@ -47,37 +35,23 @@ class BoldButton extends StatelessWidget {
 /// Simple button to toggle italic style in [StyledText]
 class ItalicButton extends StatelessWidget {
   final ValueNotifier<StyledText?> value;
-  final Shortcut? shortcut;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const ItalicButton({super.key, required this.value, this.shortcut, this.onPressed, this.tooltip = 'Italic'});
-
-  /// Create a [Shortcut] for italic action
-  static Shortcut createShortcut({
-    VoidCallback? onPressed,
-    StyledEditingController<StyledText>? controller,
-    FocusNode? propagateTo,
-  }) {
-    return Shortcut.withCmdOrCtrl(
-      intent: const ItalicIntent(),
-      onInvoke: _getShortcutCallback(
-        onPressed: onPressed,
-        controller: controller,
-        propagateTo: propagateTo,
-        styler: (style) => style.copyWith(isItalic: true),
-      ),
-    );
-  }
+  const ItalicButton({super.key, required this.value, this.onPressed, this.tooltip = 'Italic'});
 
   @override
   Widget build(BuildContext context) {
+    final intent = StyledWrapper.maybeOf(context)?.getIntent(ItalicIntent);
     return ToggleableButton(
       value: value,
       icon: const Icon(Icons.format_italic),
-      tooltip: shortcut?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
+      tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isItalic,
-      onPressed: shortcut?.onInvoke ?? onPressed!,
+      onPressed: () {
+        StyledWrapper.maybeOf(context)?.getInvoker(ItalicIntent)();
+        onPressed?.call();
+      },
     );
   }
 }
@@ -85,43 +59,23 @@ class ItalicButton extends StatelessWidget {
 /// Simple button to toggle strikethrough style in [StyledText]
 class StrikethroughButton extends StatelessWidget {
   final ValueNotifier<StyledText?> value;
-  final Shortcut? shortcut;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const StrikethroughButton({
-    super.key,
-    required this.value,
-    this.shortcut,
-    this.onPressed,
-    this.tooltip = 'Strikethrough',
-  });
-
-  /// Create a [Shortcut] for strikethrough action
-  static Shortcut createShortcut({
-    VoidCallback? onPressed,
-    StyledEditingController<StyledText>? controller,
-    FocusNode? propagateTo,
-  }) {
-    return Shortcut.withCmdOrCtrl(
-      intent: const StrikethroughIntent(),
-      onInvoke: _getShortcutCallback(
-        onPressed: onPressed,
-        controller: controller,
-        propagateTo: propagateTo,
-        styler: (style) => style.copyWith(isStrikethrough: true),
-      ),
-    );
-  }
+  const StrikethroughButton({super.key, required this.value, this.onPressed, this.tooltip = 'Strikethrough'});
 
   @override
   Widget build(BuildContext context) {
+    final intent = StyledWrapper.maybeOf(context)?.getIntent(StrikethroughIntent);
     return ToggleableButton(
       value: value,
       icon: const Icon(Icons.strikethrough_s),
-      tooltip: shortcut?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
+      tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isStrikethrough,
-      onPressed: shortcut?.onInvoke ?? onPressed!,
+      onPressed: () {
+        StyledWrapper.maybeOf(context)?.getInvoker(StrikethroughIntent)();
+        onPressed?.call();
+      },
     );
   }
 }
@@ -129,85 +83,62 @@ class StrikethroughButton extends StatelessWidget {
 /// Simple button to toggle underline style in [StyledText]
 class UnderlineButton extends StatelessWidget {
   final ValueNotifier<StyledText?> value;
-  final Shortcut? shortcut;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const UnderlineButton({super.key, required this.value, this.shortcut, this.onPressed, this.tooltip = 'Underline'});
-
-  /// Create a [Shortcut] for underline action
-  static Shortcut createShortcut({
-    VoidCallback? onPressed,
-    StyledEditingController<StyledText>? controller,
-    FocusNode? propagateTo,
-  }) {
-    return Shortcut.withCmdOrCtrl(
-      intent: const UnderlineIntent(),
-      onInvoke: _getShortcutCallback(
-        onPressed: onPressed,
-        controller: controller,
-        propagateTo: propagateTo,
-        styler: (style) => style.copyWith(isUnderline: true),
-      ),
-    );
-  }
+  const UnderlineButton({super.key, required this.value, this.onPressed, this.tooltip = 'Underline'});
 
   @override
   Widget build(BuildContext context) {
+    final intent = StyledWrapper.maybeOf(context)?.getIntent(UnderlineIntent);
     return ToggleableButton(
       value: value,
       icon: const Icon(Icons.format_underline),
-      tooltip: shortcut?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
+      tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isUnderline,
-      onPressed: shortcut?.onInvoke ?? onPressed!,
+      onPressed: () {
+        StyledWrapper.maybeOf(context)?.getInvoker(UnderlineIntent)();
+        onPressed?.call();
+      },
     );
   }
 }
 
 /// A simple text field to select font size for [StyledText]
-class FontSizeField extends StatelessWidget {
+class FontSizeField extends StatefulWidget {
   final TextEditingController controller;
-  final FocusNode focusNode;
-  final StyledEditingController<StyledText> styledEditingController;
-  final FocusNode? propagateTo;
+  final StyledEditingController<StyledText> styledTextController;
+  final FocusNode? styledTextFocusNode;
   final double width;
 
   const FontSizeField({
     super.key,
     required this.controller,
-    required this.focusNode,
-    required this.styledEditingController,
-    this.propagateTo,
+    required this.styledTextController,
+    this.styledTextFocusNode,
     this.width = 52,
   });
 
-  /// Create a [FocusNode] that listens for Escape key to propagate focus
-  static FocusNode createFocusNode({required VoidCallback onEscape, FocusNode? propagateTo}) {
-    return FocusNode(
-      onKeyEvent: (FocusNode node, KeyEvent event) {
-        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-          onEscape();
-          propagateTo?.requestFocus();
-          return KeyEventResult.handled; // Prevent the event from bubbling up
-        }
-        return KeyEventResult.ignored;
-      },
-    );
-  }
+  @override
+  State<FontSizeField> createState() => _FontSizeFieldState();
+}
+
+class _FontSizeFieldState extends State<FontSizeField> {
+  late final FocusNode _focusNode;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
+      width: widget.width,
       child: Autocomplete<int>(
-        textEditingController: controller,
-        focusNode: focusNode,
+        textEditingController: widget.controller,
+        focusNode: _focusNode,
         displayStringForOption: (int option) => option.toString(),
         onSelected: (int size) {
-          styledEditingController.addStyle(
-            StyledText(range: styledEditingController.selection).copyWith(fontSize: size),
+          widget.styledTextController.addStyle(
+            StyledText(range: widget.styledTextController.selection).copyWith(fontSize: size),
           );
-          propagateTo?.requestFocus();
+          widget.styledTextFocusNode?.requestFocus();
         },
         fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
           return TextFormField(
@@ -244,6 +175,43 @@ class FontSizeField extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  void initState() {
+    widget.styledTextController.activeStyle.addListener(_reset);
+    _focusNode = FocusNode(
+      onKeyEvent: (FocusNode node, KeyEvent event) {
+        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+          _reset();
+          widget.styledTextFocusNode?.requestFocus();
+          return KeyEventResult.handled; // Prevent the event from bubbling up
+        }
+        return KeyEventResult.ignored;
+      },
+    );
+    super.initState();
+  }
+
+  @override
+  dispose() {
+    widget.styledTextController.activeStyle.removeListener(_reset);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant FontSizeField oldWidget) {
+    if (oldWidget.styledTextController != widget.styledTextController) {
+      oldWidget.styledTextController.activeStyle.removeListener(_reset);
+      widget.styledTextController.activeStyle.addListener(_reset);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  _reset() {
+    widget.controller.text = (widget.styledTextController.activeStyle.value?.fontSize ?? defaultFontSize)
+        .round()
+        .toString();
+  }
 }
 
 /// A simple color selector to select text color for [StyledText]
@@ -251,7 +219,7 @@ class ColorSelector extends StatelessWidget {
   final ValueNotifier<StyledText?> value;
   final MenuController controller;
   final List<List<Color?>> colors;
-  final List<String>? colorNames;
+  final List<String?>? colorNames;
   final StyledEditingController<StyledText> styledEditingController;
   final FocusNode? propagateTo;
   final String tooltip;
@@ -306,7 +274,7 @@ class ColorSelector extends StatelessWidget {
             children: [
               for (final color in row)
                 IconButton(
-                  icon: color == null ? Icon(Icons.circle_outlined) : Icon(Icons.circle, color: color),
+                  icon: color == null ? Icon(Icons.format_color_reset) : Icon(Icons.circle, color: color),
                   tooltip:
                       colorNames?.elementAtOrNull(i++) ??
                       (color == null ? 'Reset' : '0x${color.toARGB32().toRadixString(16)}'),
@@ -485,18 +453,4 @@ Icon _textAlignToIcon(TextAlign align) {
     default:
       return const Icon(Icons.format_align_right);
   }
-}
-
-void Function([Intent?]) _getShortcutCallback({
-  VoidCallback? onPressed,
-  StyledEditingController<StyledText>? controller,
-  FocusNode? propagateTo,
-  required StyledText Function(StyledText) styler,
-}) {
-  return onPressed != null
-      ? ([_]) => onPressed()
-      : ([_]) {
-          controller!.addStyle(styler(StyledText(range: controller.selection)));
-          propagateTo?.requestFocus();
-        };
 }

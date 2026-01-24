@@ -57,7 +57,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       if (!other.range.isValid) {
         other = other.copyWith(start: 0, end: 0);
       }
-      activeStyle.value = (activeStyle.value?.copyWith(other: other, toggle: true) ?? other);
+      activeStyle.value = (activeStyle.value?.toggleWith(other) ?? other);
       if (!activeStyle.value!.range.isCollapsed) {
         activeStyle.value!.range = other.range;
       }
@@ -205,7 +205,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         // left part
         result.add(style.copyWith(end: target.range.start));
         // overlap part
-        result.add(style.copyWith(start: target.range.start, end: target.range.end, other: target, toggle: toggle));
+        result.add(style.toggleWith(target, start: target.range.start, end: target.range.end, toggle: toggle));
         // right part
         result.add(style.copyWith(start: target.range.end));
         target = target.copyWith(start: target.range.end); // mark as collapsed
@@ -216,7 +216,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         // left part
         result.add(style.copyWith(end: target.range.start));
         // overlap part
-        result.add(style.copyWith(start: target.range.start, other: target, toggle: toggle));
+        result.add(style.toggleWith(target, start: target.range.start, toggle: toggle));
         // right part
         target = target.copyWith(start: style.range.end);
         continue;
@@ -226,7 +226,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         // left part
         result.add(target.copyWith(end: style.range.start));
         // overlap part
-        result.add(style.copyWith(end: target.range.end, other: target, toggle: toggle));
+        result.add(style.toggleWith(target, end: target.range.end, toggle: toggle));
         // right part
         result.add(style.copyWith(start: target.range.end));
         target = target.copyWith(start: target.range.end); // mark as collapsed
@@ -238,7 +238,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         logging('$target(new)[$style]', 'Position');
       }
       result.add(target.copyWith(end: style.range.start));
-      result.add(style.copyWith(other: target, toggle: toggle));
+      result.add(style.toggleWith(target, toggle: toggle));
       target = target.copyWith(start: style.range.end);
     }
 

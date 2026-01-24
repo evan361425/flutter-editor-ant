@@ -38,8 +38,6 @@ class StyledText extends StyledRange<StyledText> {
   StyledText copyWith({
     int? start,
     int? end,
-    StyledText? other,
-    bool toggle = false,
     bool isBold = false,
     bool isItalic = false,
     bool isStrikethrough = false,
@@ -49,28 +47,25 @@ class StyledText extends StyledRange<StyledText> {
   }) {
     return StyledText(
       range: TextRange(start: start ?? range.start, end: end ?? range.end),
-      isBold: isBold
-          ? true
-          : other?.isBold == true
-          ? (!this.isBold || !toggle)
-          : this.isBold,
-      isItalic: isItalic
-          ? true
-          : other?.isItalic == true
-          ? (!this.isItalic || !toggle)
-          : this.isItalic,
-      isStrikethrough: isStrikethrough
-          ? true
-          : other?.isStrikethrough == true
-          ? (!this.isStrikethrough || !toggle)
-          : this.isStrikethrough,
-      isUnderline: isUnderline
-          ? true
-          : other?.isUnderline == true
-          ? (!this.isUnderline || !toggle)
-          : this.isUnderline,
-      fontSize: fontSize ?? other?.fontSize ?? this.fontSize,
-      color: color ?? other?.color ?? this.color,
+      isBold: isBold ? true : this.isBold,
+      isItalic: isItalic ? true : this.isItalic,
+      isStrikethrough: isStrikethrough ? true : this.isStrikethrough,
+      isUnderline: isUnderline ? true : this.isUnderline,
+      fontSize: fontSize ?? this.fontSize,
+      color: color ?? this.color,
+    );
+  }
+
+  @override
+  StyledText toggleWith(StyledText other, {int? start, int? end, bool toggle = true}) {
+    return StyledText(
+      range: TextRange(start: start ?? range.start, end: end ?? range.end),
+      isBold: other.isBold ? !isBold || !toggle : isBold,
+      isItalic: other.isItalic ? !isItalic || !toggle : isItalic,
+      isStrikethrough: other.isStrikethrough ? !isStrikethrough || !toggle : isStrikethrough,
+      isUnderline: other.isUnderline ? !isUnderline || !toggle : isUnderline,
+      fontSize: fontSize,
+      color: color,
     );
   }
 
@@ -89,17 +84,17 @@ class StyledText extends StyledRange<StyledText> {
 
   @override
   bool hasSameToggleState(StyledText other) {
-    if (other.isBold) {
-      return isBold;
+    if (isBold) {
+      return other.isBold;
     }
-    if (other.isItalic) {
-      return isItalic;
+    if (isItalic) {
+      return other.isItalic;
     }
-    if (other.isStrikethrough) {
-      return isStrikethrough;
+    if (isStrikethrough) {
+      return other.isStrikethrough;
     }
-    if (other.isUnderline) {
-      return isUnderline;
+    if (isUnderline) {
+      return other.isUnderline;
     }
     return false;
   }

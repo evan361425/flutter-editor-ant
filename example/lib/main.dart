@@ -1,5 +1,6 @@
 import 'package:editor_ant/editor_ant.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   EditorAntConfig.enableLogging = true;
@@ -19,10 +20,22 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: themeMode,
       builder: (context, value, child) {
+        final lightText = ThemeData(brightness: Brightness.light).textTheme;
+        final darkText = ThemeData(brightness: Brightness.dark).textTheme;
         return MaterialApp(
           // use material 2 to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
-          theme: ThemeData(useMaterial3: !fromTest, brightness: Brightness.light, fontFamily: 'Noto Sans TC'),
-          darkTheme: ThemeData(useMaterial3: !fromTest, brightness: Brightness.dark, fontFamily: 'Noto Sans TC'),
+          theme: ThemeData(
+            useMaterial3: !fromTest,
+            brightness: Brightness.light,
+            textTheme: GoogleFonts.notoSansTcTextTheme(lightText),
+            tooltipTheme: TooltipThemeData(preferBelow: false),
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: !fromTest,
+            brightness: Brightness.dark,
+            textTheme: GoogleFonts.notoSansTcTextTheme(darkText),
+            tooltipTheme: TooltipThemeData(preferBelow: false),
+          ),
           themeMode: value,
           home: Scaffold(body: _buildBody(context)),
         );
@@ -71,13 +84,7 @@ class _EditorState extends State<_Editor> {
   late final FocusNode _focusNode;
 
   late final TextEditingController _fontSizeController;
-  late final FocusNode _fontSizeFocusNode;
   late final MenuController _colorController;
-
-  late final Shortcut _bold;
-  late final Shortcut _italic;
-  late final Shortcut _strikethrough;
-  late final Shortcut _underline;
 
   final ValueNotifier<TextAlign> _textAlign = ValueNotifier(TextAlign.left);
   final MenuController _textAlignController = MenuController();
@@ -85,30 +92,35 @@ class _EditorState extends State<_Editor> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        // Toolbar
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHigh,
-            border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
-          ),
-          height: 49,
-          width: double.infinity,
-          child: Row(children: _buildToolbarButtons()),
-        ),
-        // Editor
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(16),
+    return StyledWrapper(
+      controller: _controller,
+      focusNode: _focusNode,
+      intents: [BoldIntent.basic(), ItalicIntent.basic(), StrikethroughIntent.basic(), UnderlineIntent.basic()],
+      child: Column(
+        children: [
+          // Toolbar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHigh,
+              border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+            ),
+            height: 49,
             width: double.infinity,
-            height: double.infinity,
-            child: _buildTextField(),
+            child: Row(children: _buildToolbarButtons()),
           ),
-        ),
-      ],
+          // Editor
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              height: double.infinity,
+              child: _buildTextField(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -123,26 +135,40 @@ class _EditorState extends State<_Editor> {
               FontSizeField(
                 key: const Key('editor_ant.font_size_field'),
                 controller: _fontSizeController,
-                focusNode: _fontSizeFocusNode,
-                styledEditingController: _controller,
-                propagateTo: _focusNode,
+                styledTextController: _controller,
+                styledTextFocusNode: _focusNode,
               ),
               ColorSelector(
                 value: _controller.activeStyle,
                 controller: _colorController,
                 colors: [
-                  [Colors.black87, Colors.white, Colors.red, Colors.orange],
-                  [Colors.yellow, Colors.green, Colors.blue, Colors.purple],
+                  [null, Colors.black87, Colors.white, Colors.grey],
+                  [Colors.red, Colors.orange, Colors.amber, Colors.yellow],
+                  [Colors.lime, Colors.green, Colors.blue, Colors.purple],
+                ],
+                colorNames: [
+                  null,
+                  'Black',
+                  'White',
+                  'Grey',
+                  'Red',
+                  'Orange',
+                  'Amber',
+                  'Yellow',
+                  'Lime',
+                  'Green',
+                  'Blue',
+                  'Purple',
                 ],
                 styledEditingController: _controller,
                 propagateTo: _focusNode,
               ),
               // Style buttons
               VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-              BoldButton(value: _controller.activeStyle, shortcut: _bold),
-              ItalicButton(value: _controller.activeStyle, shortcut: _italic),
-              StrikethroughButton(value: _controller.activeStyle, shortcut: _strikethrough),
-              UnderlineButton(value: _controller.activeStyle, shortcut: _underline),
+              BoldButton(value: _controller.activeStyle),
+              ItalicButton(value: _controller.activeStyle),
+              StrikethroughButton(value: _controller.activeStyle),
+              UnderlineButton(value: _controller.activeStyle),
               // Paragraph styles
               VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
               TextAlignSelector(
@@ -169,36 +195,20 @@ class _EditorState extends State<_Editor> {
   }
 
   Widget _buildTextField() {
-    return Shortcuts(
-      shortcuts: <ShortcutActivator, Intent>{
-        _bold.activator: _bold.intent,
-        _italic.activator: _italic.intent,
-        _strikethrough.activator: _strikethrough.intent,
-        _underline.activator: _underline.intent,
+    return ValueListenableBuilder(
+      valueListenable: _textAlign,
+      builder: (context, value, child) {
+        return TextField(
+          key: const Key('editor_ant.editor'),
+          controller: _controller,
+          focusNode: _focusNode,
+          textAlign: value,
+          autofocus: true,
+          maxLines: null,
+          minLines: null,
+          decoration: const InputDecoration.collapsed(hintText: 'Start typing...'),
+        );
       },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          BoldIntent: CallbackAction<BoldIntent>(onInvoke: _bold.onInvoke),
-          ItalicIntent: CallbackAction<ItalicIntent>(onInvoke: _italic.onInvoke),
-          StrikethroughIntent: CallbackAction<StrikethroughIntent>(onInvoke: _strikethrough.onInvoke),
-          UnderlineIntent: CallbackAction<UnderlineIntent>(onInvoke: _underline.onInvoke),
-        },
-        child: ValueListenableBuilder(
-          valueListenable: _textAlign,
-          builder: (context, value, child) {
-            return TextField(
-              key: const Key('editor_ant.editor'),
-              controller: _controller,
-              focusNode: _focusNode,
-              textAlign: value,
-              autofocus: true,
-              maxLines: null,
-              minLines: null,
-              decoration: const InputDecoration.collapsed(hintText: 'Start typing...'),
-            );
-          },
-        ),
-      ),
     );
   }
 
@@ -206,32 +216,17 @@ class _EditorState extends State<_Editor> {
   void initState() {
     super.initState();
     _controller = StyledEditingController<StyledText>();
-    _controller.activeStyle.addListener(_resetFontSizeField);
     _focusNode = FocusNode();
-
     _colorController = MenuController();
     _fontSizeController = TextEditingController(text: defaultFontSize.toString());
-    _fontSizeFocusNode = FontSizeField.createFocusNode(onEscape: _resetFontSizeField, propagateTo: _focusNode);
-
-    _bold = BoldButton.createShortcut(controller: _controller, propagateTo: _focusNode);
-    _italic = ItalicButton.createShortcut(controller: _controller, propagateTo: _focusNode);
-    _strikethrough = StrikethroughButton.createShortcut(controller: _controller, propagateTo: _focusNode);
-    _underline = UnderlineButton.createShortcut(controller: _controller, propagateTo: _focusNode);
   }
 
   @override
   void dispose() {
-    _controller.activeStyle.removeListener(_resetFontSizeField);
     _controller.activeStyle.dispose();
     _controller.dispose();
     _focusNode.dispose();
-
     _fontSizeController.dispose();
-    _fontSizeFocusNode.dispose();
     super.dispose();
-  }
-
-  void _resetFontSizeField() {
-    _fontSizeController.text = (_controller.activeStyle.value?.fontSize ?? defaultFontSize).round().toString();
   }
 }

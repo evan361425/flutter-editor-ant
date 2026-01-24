@@ -13,15 +13,8 @@ void main() {
         isStrikethrough: true,
         isUnderline: true,
       );
-      final result = style.copyWith(
-        other: StyledText(
-          range: TextRange.empty,
-          isBold: true,
-          isItalic: true,
-          isStrikethrough: true,
-          isUnderline: true,
-        ),
-        toggle: true,
+      final result = style.toggleWith(
+        StyledText(range: TextRange.empty, isBold: true, isItalic: true, isStrikethrough: true, isUnderline: true),
       );
 
       expect(result.isBold, isFalse);
@@ -72,11 +65,7 @@ void main() {
   group('Buttons', () {
     testWidgets('ToggleableButton with onPressed', (tester) async {
       bool isPressed = false;
-      final shortcut = BoldButton.createShortcut(
-        onPressed: () {
-          isPressed = true;
-        },
-      );
+      bool onPressed() => isPressed = true;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -85,7 +74,7 @@ void main() {
             body: SizedBox(
               width: 100,
               height: 100,
-              child: BoldButton(shortcut: shortcut, value: ValueNotifier(null)),
+              child: BoldButton(onPressed: onPressed, value: ValueNotifier(null)),
             ),
           ),
         ),
@@ -97,10 +86,7 @@ void main() {
       expect(isPressed, isTrue);
     });
     testWidgets('FondSizeField submit', (tester) async {
-      bool isEscaped = false;
       final controller = TextEditingController(text: '16');
-      final propagateTo = FocusNode();
-      final focusNode = FontSizeField.createFocusNode(onEscape: () => isEscaped = true, propagateTo: propagateTo);
       final styledEditingController = StyledEditingController<StyledText>();
       await tester.pumpWidget(
         MaterialApp(
@@ -112,8 +98,7 @@ void main() {
               child: FontSizeField(
                 key: const Key('font_size_field'),
                 controller: controller,
-                focusNode: focusNode,
-                styledEditingController: styledEditingController,
+                styledTextController: styledEditingController,
               ),
             ),
           ),
@@ -124,7 +109,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
 
-      expect(isEscaped, isTrue);
+      expect(controller.value.text, equals('16'));
 
       await tester.enterText(find.byKey(const Key('font_size_field')), '22');
       await tester.testTextInput.receiveAction(TextInputAction.done);
