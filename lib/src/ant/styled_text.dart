@@ -44,6 +44,7 @@ class StyledText extends StyledRange<StyledText> {
     bool isUnderline = false,
     int? fontSize,
     Color? color,
+    bool resetColor = false,
   }) {
     return StyledText(
       range: TextRange(start: start ?? range.start, end: end ?? range.end),
@@ -52,7 +53,7 @@ class StyledText extends StyledRange<StyledText> {
       isStrikethrough: isStrikethrough ? true : this.isStrikethrough,
       isUnderline: isUnderline ? true : this.isUnderline,
       fontSize: fontSize ?? this.fontSize,
-      color: color ?? this.color,
+      color: resetColor ? null : (color ?? this.color),
     );
   }
 
@@ -64,8 +65,8 @@ class StyledText extends StyledRange<StyledText> {
       isItalic: other.isItalic ? !isItalic || !toggle : isItalic,
       isStrikethrough: other.isStrikethrough ? !isStrikethrough || !toggle : isStrikethrough,
       isUnderline: other.isUnderline ? !isUnderline || !toggle : isUnderline,
-      fontSize: fontSize ?? other.fontSize,
-      color: color ?? other.color,
+      fontSize: other.fontSize ?? fontSize,
+      color: other.color ?? color,
     );
   }
 

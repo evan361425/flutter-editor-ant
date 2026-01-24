@@ -285,7 +285,9 @@ class ColorSelector extends StatelessWidget {
                     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
                       FocusManager.instance.applyFocusChangesIfNeeded();
                       styledEditingController.addStyle(
-                        StyledText(range: styledEditingController.selection).copyWith(color: color),
+                        StyledText(
+                          range: styledEditingController.selection,
+                        ).copyWith(color: color, resetColor: color == null),
                       );
                       propagateTo?.requestFocus();
                     });

@@ -27,13 +27,13 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: !fromTest,
             brightness: Brightness.light,
-            textTheme: GoogleFonts.notoSansTcTextTheme(lightText),
+            textTheme: fromTest ? lightText : GoogleFonts.notoSansTcTextTheme(lightText),
             tooltipTheme: TooltipThemeData(preferBelow: false),
           ),
           darkTheme: ThemeData(
             useMaterial3: !fromTest,
             brightness: Brightness.dark,
-            textTheme: GoogleFonts.notoSansTcTextTheme(darkText),
+            textTheme: fromTest ? darkText : GoogleFonts.notoSansTcTextTheme(darkText),
             tooltipTheme: TooltipThemeData(preferBelow: false),
           ),
           themeMode: value,
