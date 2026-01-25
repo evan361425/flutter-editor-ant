@@ -24,6 +24,9 @@ class StyledText extends StyledRange<StyledText> {
   /// Color of the text.
   final Color? color;
 
+  /// Whether to reset the color when copying with a new color.
+  final bool resetColor;
+
   StyledText({
     required super.range,
     this.isBold = false,
@@ -32,6 +35,7 @@ class StyledText extends StyledRange<StyledText> {
     this.isUnderline = false,
     this.fontSize,
     this.color,
+    this.resetColor = false,
   });
 
   @override
@@ -53,7 +57,8 @@ class StyledText extends StyledRange<StyledText> {
       isStrikethrough: isStrikethrough ? true : this.isStrikethrough,
       isUnderline: isUnderline ? true : this.isUnderline,
       fontSize: fontSize ?? this.fontSize,
-      color: resetColor ? null : (color ?? this.color),
+      color: color ?? this.color,
+      resetColor: resetColor,
     );
   }
 
@@ -66,7 +71,7 @@ class StyledText extends StyledRange<StyledText> {
       isStrikethrough: other.isStrikethrough ? !isStrikethrough || !toggle : isStrikethrough,
       isUnderline: other.isUnderline ? !isUnderline || !toggle : isUnderline,
       fontSize: other.fontSize ?? fontSize,
-      color: other.color ?? color,
+      color: other.resetColor ? null : (other.color ?? color),
     );
   }
 
