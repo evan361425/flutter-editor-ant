@@ -109,6 +109,7 @@ class FontSizeField extends StatefulWidget {
   final TextEditingController controller;
   final StyledEditingController<StyledText> styledTextController;
   final FocusNode? styledTextFocusNode;
+  final int maximum;
   final double width;
 
   const FontSizeField({
@@ -117,6 +118,7 @@ class FontSizeField extends StatefulWidget {
     required this.styledTextController,
     this.styledTextFocusNode,
     this.width = 52,
+    this.maximum = 99,
   });
 
   @override
@@ -164,7 +166,7 @@ class _FontSizeFieldState extends State<FontSizeField> {
         },
         optionsBuilder: (value) {
           int size = double.tryParse(value.text)?.toInt() ?? defaultFontSize;
-          if (size >= 100) return [99];
+          if (size > widget.maximum) return [widget.maximum];
           if (size > 10) {
             final target = (size ~/ 10 + 1) * 10;
             return [for (int i = size; i < target; i++) i];
@@ -306,18 +308,23 @@ class TextAlignSelector extends StatelessWidget {
   final ValueNotifier<TextAlign> value;
   final MenuController controller;
   final String tooltip;
+  final List<TextAlign> alignments;
+  final List<String>? alignmentNames;
   final void Function(TextAlign)? onSelected;
 
   const TextAlignSelector({
     super.key,
     required this.value,
     required this.controller,
+    this.alignments = const [TextAlign.left, TextAlign.center, TextAlign.right],
+    this.alignmentNames,
     this.onSelected,
     this.tooltip = 'Text Alignment',
   });
 
   @override
   Widget build(BuildContext context) {
+    int alignmentIndex = 0;
     return MenuAnchor(
       controller: controller,
       builder: (context, controller, child) => ValueListenableBuilder(
@@ -334,10 +341,10 @@ class TextAlignSelector extends StatelessWidget {
       menuChildren: [
         Row(
           children: [
-            for (final alignment in [TextAlign.left, TextAlign.center, TextAlign.right])
+            for (final alignment in alignments)
               IconButton(
                 icon: _textAlignToIcon(alignment),
-                tooltip: alignment.toString(),
+                tooltip: alignmentNames?.elementAtOrNull(alignmentIndex++) ?? alignment.toString(),
                 onPressed: () {
                   // Delay the call to onPressed until post-frame so that the focus is
                   // restored to what it was before the menu was opened before the action is
