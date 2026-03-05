@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.0.3] - 2026-03-05
+
+### Fixed
+
+- ([2172629](https://github.com/evan361425/flutter-editor-ant/commit/21726291d62efbc88a496d77aa714781078aa792)) correct text align justify icon - @wu0dj2k7ao3
+
 ## [v1.0.2] - 2026-03-05
 
 ### Fixed
@@ -24,7 +30,8 @@ Please check git diff.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.2...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.3...HEAD
+[v1.0.3]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.2...v1.0.3
 [v1.0.2]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/evan361425/flutter-editor-ant/releases/v1.0.0
