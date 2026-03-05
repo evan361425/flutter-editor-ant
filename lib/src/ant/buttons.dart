@@ -454,12 +454,17 @@ class _ToggleableButtonState<T> extends State<ToggleableButton<T>> {
 }
 
 Icon _textAlignToIcon(TextAlign align) {
+  // TODO: handle rtl languages
   switch (align) {
+    case TextAlign.start:
     case TextAlign.left:
       return const Icon(Icons.format_align_left);
     case TextAlign.center:
       return const Icon(Icons.format_align_center);
-    default:
+    case TextAlign.end:
+    case TextAlign.right:
       return const Icon(Icons.format_align_right);
+    case TextAlign.justify:
+      return const Icon(Icons.format_align_justify);
   }
 }
