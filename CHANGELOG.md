@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.0.2] - 2026-03-05
+
+### Fixed
+
+- ([c542277](https://github.com/evan361425/flutter-editor-ant/commit/c542277b0200fb209b4b49d1f5323e406366bf7b)) allow tooltip on alignment and max in font size - @wu0dj2k7ao3
+
 ## [v1.0.1] - 2026-01-25
 
 ### Fixed
@@ -18,6 +24,7 @@ Please check git diff.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.1...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.2...HEAD
+[v1.0.2]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/evan361425/flutter-editor-ant/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/evan361425/flutter-editor-ant/releases/v1.0.0
