@@ -1,5 +1,6 @@
-import 'package:editor_ant/src/styled_range.dart';
 import 'package:flutter/material.dart';
+
+import '../styled_range.dart';
 
 /// Default font size used in [StyledText]
 const int defaultFontSize = 16;
