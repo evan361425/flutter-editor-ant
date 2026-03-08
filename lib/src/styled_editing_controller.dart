@@ -1,11 +1,14 @@
-import 'package:editor_ant/src/styled_range.dart';
-import 'package:editor_ant/src/util.dart';
 import 'package:flutter/widgets.dart';
+
+import 'placeholders.dart';
+import 'styled_range.dart';
+import 'util.dart';
 
 /// A [TextEditingController] that supports styled text ranges.
 class StyledEditingController<T extends StyledRange<T>> extends TextEditingController {
   String _previousText = '';
   final List<T> styles = [];
+  final List<PlaceholderIndex> placeholders = [];
   ValueNotifier<T?> activeStyle = ValueNotifier<T?>(null);
 
   StyledEditingController({super.text}) {
@@ -94,6 +97,21 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     }
   }
 
+  /// Add a placeholder at the current selection.
+  void addPlaceholder(PlaceholderText placeholder) {
+    final start = selection.baseOffset;
+    final end = selection.extentOffset;
+
+    if (start >= 0) {
+      final index = placeholders.indexWhere((p) => p.index >= start);
+      placeholders.insert(index == -1 ? placeholders.length : index, PlaceholderIndex(start, placeholder));
+      value = value.copyWith(
+        text: text.replaceRange(start, end, PlaceholderText.char),
+        selection: TextSelection.collapsed(offset: start + 1),
+      );
+    }
+  }
+
   /// Handle text or selection changes and update style ranges accordingly
   void _onChanged() {
     if (!selection.isValid) {
@@ -121,6 +139,13 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
           style.moveRange(0, length);
           break;
         }
+      }
+
+      for (final placeholder in placeholders.reversed) {
+        if (placeholder.index < start) {
+          break;
+        }
+        placeholder.index += length;
       }
 
       if (activeStyle.value?.range.isCollapsed == true) {
@@ -152,6 +177,15 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
           }
         }
       }
+
+      placeholders.removeWhere((p) => p.index >= start && p.index < end);
+      for (final placeholder in placeholders.reversed) {
+        if (placeholder.index < start) {
+          break;
+        }
+        placeholder.index -= length;
+      }
+
       styles.clear();
       styles.addAll(result);
     } else {
@@ -169,29 +203,39 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
   ///
   /// The offset is used to adjust the indices of the styles when building
   /// the [TextSpan] for a substring of the full text.
-  List<TextSpan> _buildStyledSpans(String text, int offset) {
-    final List<TextSpan> children = [];
-    int currentIndex = offset;
+  List<InlineSpan> _buildStyledSpans(String text, int offset) {
+    final List<InlineSpan> children = [];
+    int currentIndex = 0;
+
+    void addSpan(int start, int end, [TextStyle? style]) {
+      if (placeholders.isNotEmpty) {
+        for (final placeholder in placeholders) {
+          final idx = placeholder.index - offset;
+          if (idx >= start && idx < end) {
+            children.add(TextSpan(text: text.substring(start, idx - 1), style: style));
+            children.add(placeholder.placeholder.buildSpan(style));
+            start = idx;
+          }
+        }
+      }
+
+      children.add(TextSpan(text: text.substring(start, end), style: style));
+    }
 
     for (final style in styles) {
       // Add unstyled text before this span
-      if (currentIndex < style.range.start) {
-        children.add(TextSpan(text: text.substring(currentIndex - offset, style.range.start - offset)));
+      if (currentIndex < style.range.start - offset) {
+        addSpan(currentIndex, style.range.start - offset);
       }
 
-      children.add(
-        TextSpan(
-          style: style.toTextStyle(),
-          text: text.substring(style.range.start - offset, style.range.end - offset),
-        ),
-      );
+      addSpan(style.range.start - offset, style.range.end - offset, style.toTextStyle());
 
-      currentIndex = style.range.end;
+      currentIndex = style.range.end - offset;
     }
 
     // Add remaining unstyled text
     if (currentIndex < text.length) {
-      children.add(TextSpan(text: text.substring(currentIndex - offset)));
+      addSpan(currentIndex, text.length);
     }
 
     return children;

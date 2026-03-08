@@ -74,3 +74,7 @@ abstract class StyledRange<T extends StyledRange<T>> {
   /// Convert this range to a [TextStyle] representation
   TextStyle toTextStyle();
 }
+
+abstract class Part<T> {
+  InlineSpan buildSpan(T value);
+}

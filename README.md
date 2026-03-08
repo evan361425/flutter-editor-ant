@@ -31,7 +31,8 @@ Only for rich text, not coding or markdown:
 </details>
 
 This dependency-free editor leverages the native Flutter editor functionality
-without the need for extensive widget customization.
+without the need for extensive widget customization which I believe will be more
+stable and long term support.
 Our goal is to keep it lightweight and developer-friendly.
 
 The core components include:
@@ -39,7 +40,7 @@ The core components include:
 - **Controller**: An extension of `TextEditingController` that can be passed directly to a `TextField`.
 - **Wrapper**: Facilitates button styling (e.g., bold, italic) and shortcut support with minimal code.
 - **Abstract Classes**: Provides styling interfaces such as `StyledRange`.
-- **Demo Implementation**: Includes pre-built support for `StyledText` features like bold, italic, underline, font size, and colors.
+- **Demo Implementation**: Includes pre-built support for `StyledText` features like bold, italic, underline, font size, colors and placeholder.
 
 ## Installation
 

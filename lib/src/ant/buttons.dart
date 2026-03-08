@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../placeholders.dart';
 import '../styled_editing_controller.dart';
 import '../styled_range.dart';
 import '../styled_wrapper.dart';
@@ -359,6 +360,56 @@ class TextAlignSelector extends StatelessWidget {
               ),
           ],
         ),
+      ],
+    );
+  }
+}
+
+class PlaceholderSelector extends StatelessWidget {
+  final MenuController controller;
+  final StyledEditingController<StyledText> styledEditingController;
+  final String tooltip;
+  final List<PlaceholderText> placeholders;
+  final List<String>? placeholderNames;
+  final void Function(PlaceholderText)? onSelected;
+
+  const PlaceholderSelector({
+    super.key,
+    required this.controller,
+    required this.styledEditingController,
+    this.placeholders = const [PlaceholderText(id: '_default', text: 'Placeholder')],
+    this.placeholderNames,
+    this.onSelected,
+    this.tooltip = 'Placeholder',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    int plcIndex = 0;
+    return MenuAnchor(
+      controller: controller,
+      builder: (context, controller, child) => IconButton(
+        icon: Icon(Icons.data_object),
+        tooltip: tooltip,
+        style: IconButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0))),
+        onPressed: controller.open,
+      ),
+      menuChildren: [
+        for (final placeholder in placeholders)
+          MenuItemButton(
+            onPressed: () {
+              // Delay the call to onPressed until post-frame so that the focus is
+              // restored to what it was before the menu was opened before the action is
+              // executed.
+              SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+                FocusManager.instance.applyFocusChangesIfNeeded();
+                styledEditingController.addPlaceholder(placeholder);
+                onSelected?.call(placeholder);
+              });
+              controller.close();
+            },
+            child: Text(placeholderNames?.elementAtOrNull(plcIndex++) ?? placeholder.text),
+          ),
       ],
     );
   }

@@ -88,6 +88,7 @@ class _EditorState extends State<_Editor> {
 
   final ValueNotifier<TextAlign> _textAlign = ValueNotifier(TextAlign.left);
   final MenuController _textAlignController = MenuController();
+  final MenuController _placeholderController = MenuController();
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +176,18 @@ class _EditorState extends State<_Editor> {
                 value: _textAlign,
                 controller: _textAlignController,
                 onSelected: (align) {
+                  _focusNode.requestFocus();
+                },
+              ),
+              PlaceholderSelector(
+                controller: _placeholderController,
+                placeholders: [
+                  PlaceholderText(id: 'a', text: 'TemplateA'),
+                  PlaceholderText(id: 'b', text: 'TemplateB'),
+                  PlaceholderText(id: 'c', text: 'TemplateC'),
+                ],
+                styledEditingController: _controller,
+                onSelected: (_) {
                   _focusNode.requestFocus();
                 },
               ),
