@@ -1,5 +1,6 @@
-import 'package:editor_ant/src/styled_range.dart';
 import 'package:flutter/material.dart';
+
+import '../styled_range.dart';
 
 /// Default font size used in [StyledText]
 const int defaultFontSize = 16;
@@ -26,6 +27,8 @@ class StyledText extends StyledRange<StyledText> {
 
   /// Whether to reset the color when copying with a new color.
   final bool resetColor;
+
+  TextStyle? _textStyle;
 
   StyledText({
     required super.range,
@@ -119,7 +122,7 @@ class StyledText extends StyledRange<StyledText> {
 
   @override
   TextStyle toTextStyle() {
-    return TextStyle(
+    return _textStyle ??= TextStyle(
       fontWeight: isBold ? FontWeight.bold : null,
       fontStyle: isItalic ? FontStyle.italic : null,
       decoration: TextDecoration.combine([

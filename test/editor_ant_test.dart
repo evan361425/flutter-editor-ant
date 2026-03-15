@@ -310,6 +310,37 @@ void main() {
         textSpans,
       );
     });
+    testWidgets('Editing text should change placeholder index', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
+      await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
+      await tester.pumpAndSettle();
+
+      final controller = getController(tester);
+      controller.selection = const TextSelection.collapsed(offset: 3);
+
+      await tester.tap(find.byIcon(Icons.data_object));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('TemplateA'));
+      await tester.pumpAndSettle();
+
+      controller.selection = const TextSelection.collapsed(offset: 8);
+
+      await tester.tap(find.byIcon(Icons.data_object));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('TemplateB'));
+      await tester.pumpAndSettle();
+
+      controller.value = controller.value.copyWith(
+        text: 'Hel${TextPlaceholder.char}Wo${TextPlaceholder.char}rld',
+        selection: const TextSelection.collapsed(offset: 5),
+        composing: TextRange.empty,
+      );
+      await tester.pumpAndSettle();
+
+      expect(controller.placeholders.length, equals(2));
+      expect(controller.placeholders[0].index, equals(4));
+      expect(controller.placeholders[1].index, equals(7));
+    });
   });
 
   group('Fulfill test coverage', () {
@@ -421,6 +452,33 @@ void main() {
       expect(style, isA<StyledText>());
       expect((style as StyledText).isBold, isTrue);
       expect(style.isItalic, isFalse);
+    });
+    testWidgets('Insert placeholder and verify in controller and rendering', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
+      await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
+      await tester.pumpAndSettle();
+
+      final controller = getController(tester);
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      // Insert placeholder (simulate PlaceholderSelector)
+      final placeholder = TextPlaceholder(id: 'test', text: 'TestPlaceholder');
+      controller.addPlaceholder(placeholder);
+      await tester.pumpAndSettle();
+
+      // Check placeholder in controller
+      expect(controller.placeholders.length, 1);
+      expect(controller.placeholders.first.id, 'test');
+      expect(controller.text.contains(TextPlaceholder.char), isTrue);
+
+      // Check rendering: should contain a WidgetSpan
+      final editor = tester.state<EditableTextState>(
+        find.descendant(of: find.byKey(const Key('editor_ant.editor')), matching: find.byType(EditableText)),
+      );
+      final textSpan = editor.renderEditable.text as TextSpan;
+      final spans = textSpan.children;
+      expect(spans, isNotNull);
+      expect(spans!.whereType<WidgetSpan>().isNotEmpty, isTrue);
     });
   });
 }

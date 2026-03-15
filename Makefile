@@ -17,6 +17,7 @@ test: ## Run tests
 test-coverage: ## Run tests with coverage
 	flutter test --coverage
 	genhtml coverage/lcov.info -o coverage/html
+	open coverage/html/index.html
 
 .PHONY: build-example
 build-example: ## Compile for GithHub Pages

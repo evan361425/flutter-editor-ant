@@ -117,6 +117,39 @@ void main() {
 
       expect(styledEditingController.activeStyle.value?.fontSize, equals(22));
     });
+    testWidgets('FondSizeField change controller', (tester) async {
+      final controller = TextEditingController(text: '16');
+      final oldController = StyledEditingController<StyledText>(text: 'test');
+      final newController = StyledEditingController<StyledText>(text: 'test2');
+      final toggler = ValueNotifier(oldController);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(splashFactory: InkRipple.splashFactory),
+          home: Scaffold(
+            body: ValueListenableBuilder(
+              valueListenable: toggler,
+              builder: (context, value, child) {
+                return SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: FontSizeField(
+                    key: const Key('font_size_field'),
+                    controller: controller,
+                    styledTextController: value,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      toggler.value = newController;
+      await tester.pumpAndSettle();
+
+      expect(newController.activeStyle.value, isNull);
+    });
     testWidgets('TextAlign', (tester) async {
       final value = ValueNotifier<TextAlign>(TextAlign.left);
       final controller = MenuController();
@@ -127,7 +160,11 @@ void main() {
           home: Scaffold(
             body: SizedBox.fromSize(
               size: const Size(300, 100),
-              child: TextAlignSelector(value: value, controller: controller),
+              child: TextAlignSelector(
+                value: value,
+                controller: controller,
+                alignments: const [TextAlign.left, TextAlign.center, TextAlign.right, TextAlign.justify],
+              ),
             ),
           ),
         ),
@@ -139,6 +176,66 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(value.value, TextAlign.right);
+    });
+    testWidgets('ColorSelector', (tester) async {
+      final value = ValueNotifier<StyledText?>(null);
+      final controller = MenuController();
+      final styledEditingController = StyledEditingController<StyledText>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(splashFactory: InkRipple.splashFactory),
+          home: Scaffold(
+            body: SizedBox.fromSize(
+              size: const Size(300, 100),
+              child: ColorSelector(
+                value: value,
+                controller: controller,
+                colors: [
+                  [null, Colors.black87, Colors.white],
+                ],
+                styledEditingController: styledEditingController,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.format_color_text));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.format_color_reset), findsOneWidget);
+    });
+  });
+
+  group('AntPart', () {
+    test('toParts with styles and placeholders', () {
+      final text = 'Hello${TextPlaceholder.char}World';
+      final placeholder = TextPlaceholder(id: 'p1', text: 'P1');
+      final controller = StyledEditingController<StyledText>();
+      controller.value = TextEditingValue(text: text);
+      controller.styles.add(StyledText(range: const TextRange(start: 1, end: 10), isBold: true));
+      controller.placeholders.add(IndexPlaceholder.from(5, placeholder));
+
+      final parts = controller.toParts();
+      // Should contain: StyledPart('Hello', bold), PlaceholderPart, StyledPart('World', bold)
+      expect(parts.length, equals(5));
+      // Find the sequence: StyledPart, PlaceholderPart, StyledPart
+      final styledParts = parts.whereType<StyledPart>().toList();
+      final placeholderParts = parts.whereType<PlaceholderPart>().toList();
+      expect(styledParts.length, equals(4));
+      expect(placeholderParts.length, equals(1));
+      expect(styledParts[0].text, 'H');
+      expect(styledParts[0].style, isNull);
+      expect(styledParts[1].text, 'ello');
+      expect(styledParts[1].style?.isBold, isTrue);
+      expect(styledParts[2].text, 'Worl');
+      expect(styledParts[2].style?.isBold, isTrue);
+      expect(styledParts[3].text, 'd');
+      expect(styledParts[3].style, isNull);
+
+      expect(styledParts[0].buildSpan(), isNotNull);
+      expect(placeholderParts[0].buildSpan('hi'), isNotNull);
     });
   });
 }
