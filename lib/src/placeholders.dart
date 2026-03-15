@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class PlaceholderText {
+class TextPlaceholder {
   static const String char = '\uFFFC';
   static const int rune = 0xFFFC;
 
@@ -8,7 +8,7 @@ class PlaceholderText {
 
   final String text;
 
-  const PlaceholderText({required this.id, required this.text});
+  const TextPlaceholder({required this.id, required this.text});
 
   InlineSpan buildSpan(TextStyle? style) {
     return WidgetSpan(
@@ -29,9 +29,12 @@ class PlaceholderText {
   }
 }
 
-class PlaceholderIndex {
+class IndexPlaceholder extends TextPlaceholder {
   int index;
-  final PlaceholderText placeholder;
 
-  PlaceholderIndex(this.index, this.placeholder);
+  IndexPlaceholder({required super.id, required super.text, required this.index});
+
+  factory IndexPlaceholder.from(int index, TextPlaceholder placeholder) {
+    return IndexPlaceholder(id: placeholder.id, text: placeholder.text, index: index);
+  }
 }

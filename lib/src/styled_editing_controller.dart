@@ -8,7 +8,7 @@ import 'util.dart';
 class StyledEditingController<T extends StyledRange<T>> extends TextEditingController {
   String _previousText = '';
   final List<T> styles = [];
-  final List<PlaceholderIndex> placeholders = [];
+  final List<IndexPlaceholder> placeholders = [];
   ValueNotifier<T?> activeStyle = ValueNotifier<T?>(null);
 
   StyledEditingController({super.text}) {
@@ -98,15 +98,15 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
   }
 
   /// Add a placeholder at the current selection.
-  void addPlaceholder(PlaceholderText placeholder) {
+  void addPlaceholder(TextPlaceholder placeholder) {
     final start = selection.baseOffset;
     final end = selection.extentOffset;
 
     if (start >= 0) {
       final index = placeholders.indexWhere((p) => p.index >= start);
-      placeholders.insert(index == -1 ? placeholders.length : index, PlaceholderIndex(start, placeholder));
+      placeholders.insert(index == -1 ? placeholders.length : index, IndexPlaceholder.from(start, placeholder));
       value = value.copyWith(
-        text: text.replaceRange(start, end, PlaceholderText.char),
+        text: text.replaceRange(start, end, TextPlaceholder.char),
         selection: TextSelection.collapsed(offset: start + 1),
       );
     }
@@ -213,7 +213,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
           final idx = placeholder.index - offset;
           if (idx >= start && idx < end) {
             children.add(TextSpan(text: text.substring(start, idx - 1), style: style));
-            children.add(placeholder.placeholder.buildSpan(style));
+            children.add(placeholder.buildSpan(style));
             start = idx;
           }
         }

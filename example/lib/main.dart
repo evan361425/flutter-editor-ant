@@ -182,9 +182,9 @@ class _EditorState extends State<_Editor> {
               PlaceholderSelector(
                 controller: _placeholderController,
                 placeholders: [
-                  PlaceholderText(id: 'a', text: 'TemplateA'),
-                  PlaceholderText(id: 'b', text: 'TemplateB'),
-                  PlaceholderText(id: 'c', text: 'TemplateC'),
+                  TextPlaceholder(id: 'a', text: 'TemplateA'),
+                  TextPlaceholder(id: 'b', text: 'TemplateB'),
+                  TextPlaceholder(id: 'c', text: 'TemplateC'),
                 ],
                 styledEditingController: _controller,
                 onSelected: (_) {

@@ -28,6 +28,8 @@ class StyledText extends StyledRange<StyledText> {
   /// Whether to reset the color when copying with a new color.
   final bool resetColor;
 
+  TextStyle? _textStyle;
+
   StyledText({
     required super.range,
     this.isBold = false,
@@ -120,7 +122,7 @@ class StyledText extends StyledRange<StyledText> {
 
   @override
   TextStyle toTextStyle() {
-    return TextStyle(
+    return _textStyle ??= TextStyle(
       fontWeight: isBold ? FontWeight.bold : null,
       fontStyle: isItalic ? FontStyle.italic : null,
       decoration: TextDecoration.combine([

@@ -369,15 +369,15 @@ class PlaceholderSelector extends StatelessWidget {
   final MenuController controller;
   final StyledEditingController<StyledText> styledEditingController;
   final String tooltip;
-  final List<PlaceholderText> placeholders;
+  final List<TextPlaceholder> placeholders;
   final List<String>? placeholderNames;
-  final void Function(PlaceholderText)? onSelected;
+  final void Function(TextPlaceholder)? onSelected;
 
   const PlaceholderSelector({
     super.key,
     required this.controller,
     required this.styledEditingController,
-    this.placeholders = const [PlaceholderText(id: '_default', text: 'Placeholder')],
+    this.placeholders = const [TextPlaceholder(id: '_default', text: 'Placeholder')],
     this.placeholderNames,
     this.onSelected,
     this.tooltip = 'Placeholder',

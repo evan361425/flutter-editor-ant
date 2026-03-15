@@ -1,26 +1,29 @@
 import 'package:flutter/widgets.dart';
 
-import '../placeholders.dart';
+import '../styled_editing_controller.dart';
 import '../styled_range.dart';
 import 'styled_text.dart';
 
-class AntPart {
-  static List<Part> toParts(String text, List<StyledText> styles, List<PlaceholderIndex> placeholders) {
+extension AntPart on StyledEditingController<StyledText> {
+  List<Part> toParts() {
+    final text = value.text;
     final List<Part> parts = [];
 
     void addPart(int start, int end, [StyledText? style]) {
-      if (placeholders.isNotEmpty) {
-        for (final placeholder in placeholders) {
-          if (placeholder.index >= start && placeholder.index < end) {
-            final s = StyledPart(text.substring(start, placeholder.index - 1), style);
-            parts.add(s);
-            parts.add(PlaceholderPart(id: placeholder.placeholder.id, style: s));
-            start = placeholder.index;
+      for (final placeholder in placeholders) {
+        if (placeholder.index >= start && placeholder.index < end) {
+          if (placeholder.index != start) {
+            parts.add(StyledPart(text.substring(start, placeholder.index), style));
           }
+          parts.add(PlaceholderPart(id: placeholder.id, style: style));
+
+          start = placeholder.index + 1;
         }
       }
 
-      parts.add(StyledPart(text.substring(start, end), style));
+      if (start < end) {
+        parts.add(StyledPart(text.substring(start, end), style));
+      }
     }
 
     int currentIndex = 0;
@@ -36,10 +39,6 @@ class AntPart {
       addPart(currentIndex, text.length);
     }
 
-    for (final placeholder in placeholders) {
-      parts.insert(placeholder.index, PlaceholderPart(id: placeholder.placeholder.id));
-    }
-
     return parts;
   }
 }
@@ -51,29 +50,25 @@ class StyledPart extends Part<int> {
   /// The style applied to this part, if any.
   final StyledText? style;
 
-  TextStyle? _textStyle;
-
   StyledPart(this.text, [this.style]);
-
-  TextStyle? get textStyle {
-    if (style == null) return null;
-    return _textStyle ??= style!.toTextStyle();
-  }
 
   @override
   InlineSpan buildSpan([int? _]) {
-    return TextSpan(text: text, style: textStyle);
+    return TextSpan(text: text, style: style?.toTextStyle());
   }
 }
 
 class PlaceholderPart extends Part<String> {
+  /// The unique identifier for this placeholder.
   final String id;
-  final StyledPart? style;
+
+  /// The style applied to this placeholder, if any.
+  final StyledText? style;
 
   PlaceholderPart({required this.id, this.style});
 
   @override
   InlineSpan buildSpan(String text) {
-    return TextSpan(text: text, style: style?.textStyle);
+    return TextSpan(text: text, style: style?.toTextStyle());
   }
 }
