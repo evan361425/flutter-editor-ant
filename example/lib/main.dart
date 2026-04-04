@@ -1,9 +1,12 @@
-import 'package:editor_ant/editor_ant.dart';
+import 'dart:convert';
+
+import 'package:appflowy_editor/appflowy_editor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 void main() async {
-  EditorAntConfig.enableLogging = true;
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp(fromTest: false));
 }
@@ -11,113 +14,113 @@ void main() async {
 class MyApp extends StatelessWidget {
   final bool fromTest;
 
-  static final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.system);
-
   const MyApp({super.key, this.fromTest = true});
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: themeMode,
-      builder: (context, value, child) {
-        final lightText = ThemeData(brightness: Brightness.light).textTheme;
-        final darkText = ThemeData(brightness: Brightness.dark).textTheme;
-        return MaterialApp(
-          // use material 2 to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
-          theme: ThemeData(
-            useMaterial3: !fromTest,
-            brightness: Brightness.light,
-            textTheme: fromTest ? lightText : GoogleFonts.notoSansTcTextTheme(lightText),
-            tooltipTheme: TooltipThemeData(preferBelow: false),
-          ),
-          darkTheme: ThemeData(
-            useMaterial3: !fromTest,
-            brightness: Brightness.dark,
-            textTheme: fromTest ? darkText : GoogleFonts.notoSansTcTextTheme(darkText),
-            tooltipTheme: TooltipThemeData(preferBelow: false),
-          ),
-          themeMode: value,
-          home: Scaffold(body: _buildBody(context)),
-        );
-      },
-    );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    if (fromTest) return _Editor();
-
-    return Center(
-      child: SizedBox(
-        width: 600,
-        height: 650,
-        child: Stack(
-          children: [
-            Card(child: _Editor()),
-            Positioned(
-              bottom: 32,
-              left: 0,
-              right: 0,
-              child: Opacity(
-                opacity: 0.8,
-                child: IgnorePointer(
-                  ignoring: true,
-                  child: SizedBox.square(dimension: 200, child: Image.asset('assets/editor-ant.png')),
-                ),
-              ),
-            ),
-          ],
+    return MaterialApp(
+      theme: ThemeData(),
+      darkTheme: ThemeData(brightness: Brightness.dark),
+      home: Scaffold(
+        body: FutureBuilder(
+          future: rootBundle.loadString('assets/mobile_example.json'),
+          builder: (context, snapshot) {
+            return !snapshot.hasData
+                ? const Center(child: CircularProgressIndicator())
+                : MobileEditor(
+                    editorState: EditorState(
+                      document: Document.fromJson(Map<String, Object>.from(json.decode(snapshot.data!))),
+                    ),
+                  );
+          },
         ),
       ),
     );
   }
 }
 
-class _Editor extends StatefulWidget {
-  const _Editor();
+class MobileEditor extends StatefulWidget {
+  const MobileEditor({super.key, required this.editorState, this.editorStyle});
+
+  final EditorState editorState;
+  final EditorStyle? editorStyle;
 
   @override
-  State<_Editor> createState() => _EditorState();
+  State<MobileEditor> createState() => _MobileEditorState();
 }
 
-class _EditorState extends State<_Editor> {
-  late final StyledEditingController<StyledText> _controller;
-  late final FocusNode _focusNode;
+class _MobileEditorState extends State<MobileEditor> {
+  EditorState get editorState => widget.editorState;
 
-  late final TextEditingController _fontSizeController;
-  late final MenuController _colorController;
+  late final EditorScrollController editorScrollController;
 
-  final ValueNotifier<TextAlign> _textAlign = ValueNotifier(TextAlign.left);
-  final MenuController _textAlignController = MenuController();
-  final MenuController _placeholderController = MenuController();
+  late EditorStyle editorStyle;
+  late Map<String, BlockComponentBuilder> blockComponentBuilders;
+
+  @override
+  void initState() {
+    super.initState();
+
+    editorScrollController = EditorScrollController(editorState: editorState, shrinkWrap: false);
+
+    editorStyle = _buildMobileEditorStyle();
+    blockComponentBuilders = _buildBlockComponentBuilders();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+
+    editorStyle = _buildMobileEditorStyle();
+    blockComponentBuilders = _buildBlockComponentBuilders();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return StyledWrapper(
-      controller: _controller,
-      focusNode: _focusNode,
-      intents: [BoldIntent.basic(), ItalicIntent.basic(), StrikethroughIntent.basic(), UnderlineIntent.basic()],
+    return MobileToolbarV2(
+      toolbarHeight: 48.0,
+      toolbarItems: [
+        textDecorationMobileToolbarItemV2,
+        buildTextAndBackgroundColorMobileToolbarItem(),
+        blocksMobileToolbarItem,
+        linkMobileToolbarItem,
+        dividerMobileToolbarItem,
+      ],
+      editorState: editorState,
       child: Column(
         children: [
-          // Toolbar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHigh,
-              border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
-            ),
-            height: 49,
-            width: double.infinity,
-            child: Row(children: _buildToolbarButtons()),
-          ),
-          // Editor
+          // build appflowy editor
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              width: double.infinity,
-              height: double.infinity,
-              child: _buildTextField(),
+            child: MobileFloatingToolbar(
+              editorState: editorState,
+              editorScrollController: editorScrollController,
+              floatingToolbarHeight: 32,
+              toolbarBuilder: (context, anchor, closeToolbar) {
+                return AdaptiveTextSelectionToolbar.editable(
+                  clipboardStatus: ClipboardStatus.pasteable,
+                  onCopy: () {
+                    copyCommand.execute(editorState);
+                    closeToolbar();
+                  },
+                  onCut: () => cutCommand.execute(editorState),
+                  onPaste: () => pasteCommand.execute(editorState),
+                  onSelectAll: () => selectAllCommand.execute(editorState),
+                  onLiveTextInput: null,
+                  onLookUp: null,
+                  onSearchWeb: null,
+                  onShare: null,
+                  anchors: TextSelectionToolbarAnchors(primaryAnchor: anchor),
+                );
+              },
+              child: AppFlowyEditor(
+                editorStyle: EditorStyle.mobile(),
+                editorState: editorState,
+                editorScrollController: editorScrollController,
+                blockComponentBuilders: blockComponentBuilders,
+                showMagnifier: true,
+                // showcase 3: customize the header and footer.
+                footer: const SizedBox(height: 100),
+              ),
             ),
           ),
         ],
@@ -125,121 +128,39 @@ class _EditorState extends State<_Editor> {
     );
   }
 
-  List<Widget> _buildToolbarButtons() {
-    return [
-      Expanded(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            spacing: 2.0,
-            children: [
-              FontSizeField(
-                key: const Key('editor_ant.font_size_field'),
-                controller: _fontSizeController,
-                styledTextController: _controller,
-                styledTextFocusNode: _focusNode,
-              ),
-              ColorSelector(
-                value: _controller.activeStyle,
-                controller: _colorController,
-                colors: [
-                  [null, Colors.black87, Colors.white, Colors.grey],
-                  [Colors.red, Colors.orange, Colors.amber, Colors.yellow],
-                  [Colors.lime, Colors.green, Colors.blue, Colors.purple],
-                ],
-                colorNames: [
-                  null,
-                  'Black',
-                  'White',
-                  'Grey',
-                  'Red',
-                  'Orange',
-                  'Amber',
-                  'Yellow',
-                  'Lime',
-                  'Green',
-                  'Blue',
-                  'Purple',
-                ],
-                styledEditingController: _controller,
-                propagateTo: _focusNode,
-              ),
-              // Style buttons
-              VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-              BoldButton(value: _controller.activeStyle),
-              ItalicButton(value: _controller.activeStyle),
-              StrikethroughButton(value: _controller.activeStyle),
-              UnderlineButton(value: _controller.activeStyle),
-              // Paragraph styles
-              VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-              TextAlignSelector(
-                value: _textAlign,
-                controller: _textAlignController,
-                onSelected: (align) {
-                  _focusNode.requestFocus();
-                },
-              ),
-              PlaceholderSelector(
-                controller: _placeholderController,
-                placeholders: [
-                  TextPlaceholder(id: 'a', text: 'TemplateA'),
-                  TextPlaceholder(id: 'b', text: 'TemplateB'),
-                  TextPlaceholder(id: 'c', text: 'TemplateC'),
-                ],
-                styledEditingController: _controller,
-                onSelected: (_) {
-                  _focusNode.requestFocus();
-                },
-              ),
-            ],
-          ),
-        ),
+  // showcase 1: customize the editor style.
+  EditorStyle _buildMobileEditorStyle() {
+    return EditorStyle.mobile(
+      textScaleFactor: 1.0,
+      cursorColor: const Color.fromARGB(255, 134, 46, 247),
+      dragHandleColor: const Color.fromARGB(255, 134, 46, 247),
+      selectionColor: const Color.fromARGB(50, 134, 46, 247),
+      textStyleConfiguration: TextStyleConfiguration(
+        text: GoogleFonts.poppins(fontSize: 14, color: Colors.black),
+        code: GoogleFonts.sourceCodePro(backgroundColor: Colors.grey.shade200),
       ),
-      VerticalDivider(width: 2, thickness: 2, indent: 2, endIndent: 2),
-      ToggleableButton(
-        value: MyApp.themeMode,
-        icon: Icon(Icons.dark_mode_outlined),
-        onPressed: () {
-          MyApp.themeMode.value = MyApp.themeMode.value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-        },
-        predicate: (themeMode) => themeMode == ThemeMode.dark,
-      ),
-    ];
-  }
-
-  Widget _buildTextField() {
-    return ValueListenableBuilder(
-      valueListenable: _textAlign,
-      builder: (context, value, child) {
-        return TextField(
-          key: const Key('editor_ant.editor'),
-          controller: _controller,
-          focusNode: _focusNode,
-          textAlign: value,
-          autofocus: true,
-          maxLines: null,
-          minLines: null,
-          decoration: const InputDecoration.collapsed(hintText: 'Start typing...'),
-        );
-      },
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      magnifierSize: const Size(144, 96),
+      mobileDragHandleBallSize: UniversalPlatform.isIOS ? const Size.square(12) : const Size.square(8),
+      mobileDragHandleLeftExtend: 12.0,
+      mobileDragHandleWidthExtend: 24.0,
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = StyledEditingController<StyledText>();
-    _focusNode = FocusNode();
-    _colorController = MenuController();
-    _fontSizeController = TextEditingController(text: defaultFontSize.toString());
-  }
-
-  @override
-  void dispose() {
-    _controller.activeStyle.dispose();
-    _controller.dispose();
-    _focusNode.dispose();
-    _fontSizeController.dispose();
-    super.dispose();
+  // showcase 2: customize the block style
+  Map<String, BlockComponentBuilder> _buildBlockComponentBuilders() {
+    final map = {...standardBlockComponentBuilderMap};
+    // customize the heading block component
+    final levelToFontSize = [24.0, 22.0, 20.0, 18.0, 16.0, 14.0];
+    map[HeadingBlockKeys.type] = HeadingBlockComponentBuilder(
+      textStyleBuilder: (level) => GoogleFonts.poppins(
+        fontSize: levelToFontSize.elementAtOrNull(level - 1) ?? 14.0,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    map[ParagraphBlockKeys.type] = ParagraphBlockComponentBuilder(
+      configuration: BlockComponentConfiguration(placeholderText: (node) => 'Type something...'),
+    );
+    return map;
   }
 }
