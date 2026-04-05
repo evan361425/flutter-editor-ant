@@ -225,6 +225,10 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     }
 
     for (final style in styles) {
+      if (style.range.start < offset) {
+        continue;
+      }
+
       // Add unstyled text before this span
       if (currentIndex < style.range.start - offset) {
         addSpan(currentIndex, style.range.start - offset);

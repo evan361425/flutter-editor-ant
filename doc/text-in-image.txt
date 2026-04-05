@@ -1,0 +1,3 @@
+EditorAnt is a dependency-free editor leverages the native Flutter editor functionality without the need for extensive widget customization which we believe will be more stable and long term support.
+
+The main different feature between other editors is placeholder: an object inside text that can become a placeholder for a template. For example  and clickable  for adding detailed info in it.
