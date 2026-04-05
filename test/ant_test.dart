@@ -219,6 +219,8 @@ void main() {
     ValueNotifier<StyledText?>? style;
     await tester.pumpWidget(
       MaterialApp(
+        // use material 2 to fix `'shaders/ink_sparkle.frag' not found` error on Github Actions
+        theme: ThemeData(useMaterial3: false, brightness: Brightness.light),
         home: Scaffold(
           body: ValueListenableBuilder(
             valueListenable: notifier,
