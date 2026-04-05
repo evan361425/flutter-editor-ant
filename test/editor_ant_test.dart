@@ -320,7 +320,7 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.data_object));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('TemplateA'));
+      await tester.tap(find.text('Date'));
       await tester.pumpAndSettle();
 
       controller.selection = const TextSelection.collapsed(offset: 8);
@@ -338,6 +338,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.placeholders.length, equals(2));
+      expect(controller.placeholders[0].index, equals(3));
+      expect(controller.placeholders[1].index, equals(6));
+
+      controller.value = controller.value.copyWith(
+        text: 'Hell${TextPlaceholder.char}Wo${TextPlaceholder.char}rld',
+        selection: const TextSelection.collapsed(offset: 3),
+        composing: TextRange.empty,
+      );
+      await tester.pumpAndSettle();
+
       expect(controller.placeholders[0].index, equals(4));
       expect(controller.placeholders[1].index, equals(7));
     });

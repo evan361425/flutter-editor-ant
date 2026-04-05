@@ -11,22 +11,22 @@ import 'styled_text.dart';
 
 /// Simple button to toggle bold style in [StyledText]
 class BoldButton extends StatelessWidget {
-  final ValueNotifier<StyledText?> value;
+  final ValueNotifier<StyledText?>? value;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const BoldButton({super.key, required this.value, this.onPressed, this.tooltip = 'Bold'});
+  const BoldButton({super.key, this.value, this.onPressed, this.tooltip = 'Bold'});
 
   @override
   Widget build(BuildContext context) {
-    final intent = StyledWrapper.maybeOf(context)?.getIntent(BoldIntent);
-    return ToggleableButton(
+    final intent = StyledWrapper.maybeOf<StyledText>(context)?.getIntent(BoldIntent);
+    return StyledTextToggleableButton(
       value: value,
       icon: const Icon(Icons.format_bold),
       tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isBold,
       onPressed: () {
-        StyledWrapper.maybeOf(context)?.getInvoker(BoldIntent)();
+        StyledWrapper.maybeOf<StyledText>(context)?.getInvoker(BoldIntent)();
         onPressed?.call();
       },
     );
@@ -35,22 +35,22 @@ class BoldButton extends StatelessWidget {
 
 /// Simple button to toggle italic style in [StyledText]
 class ItalicButton extends StatelessWidget {
-  final ValueNotifier<StyledText?> value;
+  final ValueNotifier<StyledText?>? value;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const ItalicButton({super.key, required this.value, this.onPressed, this.tooltip = 'Italic'});
+  const ItalicButton({super.key, this.value, this.onPressed, this.tooltip = 'Italic'});
 
   @override
   Widget build(BuildContext context) {
-    final intent = StyledWrapper.maybeOf(context)?.getIntent(ItalicIntent);
-    return ToggleableButton(
+    final intent = StyledWrapper.maybeOf<StyledText>(context)?.getIntent(ItalicIntent);
+    return StyledTextToggleableButton(
       value: value,
       icon: const Icon(Icons.format_italic),
       tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isItalic,
       onPressed: () {
-        StyledWrapper.maybeOf(context)?.getInvoker(ItalicIntent)();
+        StyledWrapper.maybeOf<StyledText>(context)?.getInvoker(ItalicIntent)();
         onPressed?.call();
       },
     );
@@ -59,22 +59,22 @@ class ItalicButton extends StatelessWidget {
 
 /// Simple button to toggle strikethrough style in [StyledText]
 class StrikethroughButton extends StatelessWidget {
-  final ValueNotifier<StyledText?> value;
+  final ValueNotifier<StyledText?>? value;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const StrikethroughButton({super.key, required this.value, this.onPressed, this.tooltip = 'Strikethrough'});
+  const StrikethroughButton({super.key, this.value, this.onPressed, this.tooltip = 'Strikethrough'});
 
   @override
   Widget build(BuildContext context) {
-    final intent = StyledWrapper.maybeOf(context)?.getIntent(StrikethroughIntent);
-    return ToggleableButton(
+    final intent = StyledWrapper.maybeOf<StyledText>(context)?.getIntent(StrikethroughIntent);
+    return StyledTextToggleableButton(
       value: value,
       icon: const Icon(Icons.strikethrough_s),
       tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isStrikethrough,
       onPressed: () {
-        StyledWrapper.maybeOf(context)?.getInvoker(StrikethroughIntent)();
+        StyledWrapper.maybeOf<StyledText>(context)?.getInvoker(StrikethroughIntent)();
         onPressed?.call();
       },
     );
@@ -83,22 +83,22 @@ class StrikethroughButton extends StatelessWidget {
 
 /// Simple button to toggle underline style in [StyledText]
 class UnderlineButton extends StatelessWidget {
-  final ValueNotifier<StyledText?> value;
+  final ValueNotifier<StyledText?>? value;
   final VoidCallback? onPressed;
   final String tooltip;
 
-  const UnderlineButton({super.key, required this.value, this.onPressed, this.tooltip = 'Underline'});
+  const UnderlineButton({super.key, this.value, this.onPressed, this.tooltip = 'Underline'});
 
   @override
   Widget build(BuildContext context) {
-    final intent = StyledWrapper.maybeOf(context)?.getIntent(UnderlineIntent);
-    return ToggleableButton(
+    final intent = StyledWrapper.maybeOf<StyledText>(context)?.getIntent(UnderlineIntent);
+    return StyledTextToggleableButton(
       value: value,
       icon: const Icon(Icons.format_underline),
       tooltip: intent?.formatTooltip(tooltip, MaterialLocalizations.of(context)) ?? tooltip,
       predicate: (style) => style.isUnderline,
       onPressed: () {
-        StyledWrapper.maybeOf(context)?.getInvoker(UnderlineIntent)();
+        StyledWrapper.maybeOf<StyledText>(context)?.getInvoker(UnderlineIntent)();
         onPressed?.call();
       },
     );
@@ -108,7 +108,7 @@ class UnderlineButton extends StatelessWidget {
 /// A simple text field to select font size for [StyledText]
 class FontSizeField extends StatefulWidget {
   final TextEditingController controller;
-  final StyledEditingController<StyledText> styledTextController;
+  final StyledEditingController<StyledText>? styledTextController;
   final FocusNode? styledTextFocusNode;
   final int maximum;
   final double width;
@@ -116,7 +116,7 @@ class FontSizeField extends StatefulWidget {
   const FontSizeField({
     super.key,
     required this.controller,
-    required this.styledTextController,
+    this.styledTextController,
     this.styledTextFocusNode,
     this.width = 52,
     this.maximum = 99,
@@ -129,6 +129,11 @@ class FontSizeField extends StatefulWidget {
 class _FontSizeFieldState extends State<FontSizeField> {
   late final FocusNode _focusNode;
 
+  late StyledEditingController<StyledText> _editorController;
+  bool addedListener = false;
+
+  FocusNode? get editorFocusNode => widget.styledTextFocusNode ?? StyledWrapper.of<StyledText>(context).focusNode;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -138,10 +143,8 @@ class _FontSizeFieldState extends State<FontSizeField> {
         focusNode: _focusNode,
         displayStringForOption: (int option) => option.toString(),
         onSelected: (int size) {
-          widget.styledTextController.addStyle(
-            StyledText(range: widget.styledTextController.selection).copyWith(fontSize: size),
-          );
-          widget.styledTextFocusNode?.requestFocus();
+          _editorController.addStyle(StyledText(range: _editorController.selection).copyWith(fontSize: size));
+          editorFocusNode?.requestFocus();
         },
         fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
           return TextFormField(
@@ -180,13 +183,33 @@ class _FontSizeFieldState extends State<FontSizeField> {
   }
 
   @override
+  void didUpdateWidget(covariant FontSizeField oldWidget) {
+    if (oldWidget.styledTextController != widget.styledTextController) {
+      final old = oldWidget.styledTextController ?? StyledWrapper.of<StyledText>(context).controller;
+      old.activeStyle.removeListener(_reset);
+      _editorController = widget.styledTextController ?? StyledWrapper.of<StyledText>(context).controller;
+      _editorController.activeStyle.addListener(_reset);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!addedListener) {
+      _editorController = widget.styledTextController ?? StyledWrapper.of<StyledText>(context).controller;
+      _editorController.activeStyle.addListener(_reset);
+      addedListener = true;
+    }
+  }
+
+  @override
   void initState() {
-    widget.styledTextController.activeStyle.addListener(_reset);
     _focusNode = FocusNode(
       onKeyEvent: (FocusNode node, KeyEvent event) {
         if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
           _reset();
-          widget.styledTextFocusNode?.requestFocus();
+          editorFocusNode?.requestFocus();
           return KeyEventResult.handled; // Prevent the event from bubbling up
         }
         return KeyEventResult.ignored;
@@ -197,43 +220,32 @@ class _FontSizeFieldState extends State<FontSizeField> {
 
   @override
   dispose() {
-    widget.styledTextController.activeStyle.removeListener(_reset);
+    _editorController.activeStyle.removeListener(_reset);
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant FontSizeField oldWidget) {
-    if (oldWidget.styledTextController != widget.styledTextController) {
-      oldWidget.styledTextController.activeStyle.removeListener(_reset);
-      widget.styledTextController.activeStyle.addListener(_reset);
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
   _reset() {
-    widget.controller.text = (widget.styledTextController.activeStyle.value?.fontSize ?? defaultFontSize)
-        .round()
-        .toString();
+    widget.controller.text = (_editorController.activeStyle.value?.fontSize ?? defaultFontSize).round().toString();
   }
 }
 
 /// A simple color selector to select text color for [StyledText]
 class ColorSelector extends StatelessWidget {
-  final ValueNotifier<StyledText?> value;
+  final ValueNotifier<StyledText?>? value;
   final MenuController controller;
   final List<List<Color?>> colors;
   final List<String?>? colorNames;
-  final StyledEditingController<StyledText> styledEditingController;
+  final StyledEditingController<StyledText>? styledEditingController;
   final FocusNode? propagateTo;
   final String tooltip;
 
   const ColorSelector({
     super.key,
-    required this.value,
+    this.value,
     required this.controller,
     required this.colors,
     this.colorNames,
-    required this.styledEditingController,
+    this.styledEditingController,
     this.propagateTo,
     this.tooltip = 'Text Color',
   });
@@ -242,10 +254,13 @@ class ColorSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     int i = 0;
     final defaultColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black87;
+    final effectiveEditorController = styledEditingController ?? StyledWrapper.of<StyledText>(context).controller;
+    final effectiveEditorFocusNode = propagateTo ?? StyledWrapper.of<StyledText>(context).focusNode;
+    final effectiveValue = value ?? effectiveEditorController.activeStyle;
     return MenuAnchor(
       controller: controller,
       builder: (context, controller, child) => ValueListenableBuilder(
-        valueListenable: value,
+        valueListenable: effectiveValue,
         builder: (context, value, child) {
           return IconButton(
             icon: Stack(
@@ -287,12 +302,12 @@ class ColorSelector extends StatelessWidget {
                     // executed.
                     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
                       FocusManager.instance.applyFocusChangesIfNeeded();
-                      styledEditingController.addStyle(
+                      effectiveEditorController.addStyle(
                         StyledText(
-                          range: styledEditingController.selection,
+                          range: effectiveEditorController.selection,
                         ).copyWith(color: color, resetColor: color == null),
                       );
-                      propagateTo?.requestFocus();
+                      effectiveEditorFocusNode?.requestFocus();
                     });
                     controller.close();
                   },
@@ -353,6 +368,7 @@ class TextAlignSelector extends StatelessWidget {
                   SchedulerBinding.instance.addPostFrameCallback((Duration _) {
                     FocusManager.instance.applyFocusChangesIfNeeded();
                     value.value = alignment;
+                    StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
                     onSelected?.call(alignment);
                   });
                   controller.close();
@@ -367,7 +383,7 @@ class TextAlignSelector extends StatelessWidget {
 
 class PlaceholderSelector extends StatelessWidget {
   final MenuController controller;
-  final StyledEditingController<StyledText> styledEditingController;
+  final StyledEditingController<StyledText>? styledEditingController;
   final String tooltip;
   final List<TextPlaceholder> placeholders;
   final List<String>? placeholderNames;
@@ -376,7 +392,7 @@ class PlaceholderSelector extends StatelessWidget {
   const PlaceholderSelector({
     super.key,
     required this.controller,
-    required this.styledEditingController,
+    this.styledEditingController,
     this.placeholders = const [TextPlaceholder(id: '_default', text: 'Placeholder')],
     this.placeholderNames,
     this.onSelected,
@@ -403,7 +419,9 @@ class PlaceholderSelector extends StatelessWidget {
               // executed.
               SchedulerBinding.instance.addPostFrameCallback((Duration _) {
                 FocusManager.instance.applyFocusChangesIfNeeded();
-                styledEditingController.addPlaceholder(placeholder);
+                final effectiveController = styledEditingController ?? StyledWrapper.of<StyledText>(context).controller;
+                effectiveController.addPlaceholder(placeholder.create());
+                StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
                 onSelected?.call(placeholder);
               });
               controller.close();
@@ -412,6 +430,61 @@ class PlaceholderSelector extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+class StyledTextToggleableButton extends ToggleableButton<StyledText> {
+  const StyledTextToggleableButton({
+    super.key,
+    super.value,
+    required super.icon,
+    super.tooltip,
+    super.color,
+    super.backgroundColor,
+    required super.onPressed,
+    required super.predicate,
+  });
+
+  @override
+  State<ToggleableButton<StyledText>> createState() => _StyledTextToggleableButtonState();
+}
+
+class _StyledTextToggleableButtonState extends _ToggleableButtonState<StyledText> {
+  bool addedListener = false;
+
+  @override
+  void didUpdateWidget(covariant ToggleableButton<StyledText> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Situation of `oldWidget.value != null && widget.value != null` is
+    // handled by ToggleableButton's didUpdateWidget, so we only need to handle
+    // the case where one of them is null.
+    if ((oldWidget.value == null) != (widget.value == null)) {
+      final t = StyledWrapper.of<StyledText>(context).controller.activeStyle;
+      if (oldWidget.value == null) {
+        t.removeListener(_onValueChanged);
+      } else {
+        t.addListener(_onValueChanged);
+      }
+    }
+
+    value = widget.value ?? StyledWrapper.of<StyledText>(context).controller.activeStyle;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!addedListener) {
+      value = widget.value ?? StyledWrapper.of<StyledText>(context).controller.activeStyle;
+      _toggleOn = _isToggledOn(value!.value);
+      value!.addListener(_onValueChanged);
+      addedListener = true;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    addedListener = widget.value != null;
   }
 }
 
@@ -436,7 +509,7 @@ class ToggleableButton<T> extends StatefulWidget {
   final bool Function(T) predicate;
 
   /// ValueNotifier to listen for changes
-  final ValueNotifier<T?> value;
+  final ValueNotifier<T?>? value;
 
   const ToggleableButton({
     super.key,
@@ -454,6 +527,8 @@ class ToggleableButton<T> extends StatefulWidget {
 }
 
 class _ToggleableButtonState<T> extends State<ToggleableButton<T>> {
+  ValueNotifier<T?>? value;
+
   late bool _toggleOn;
 
   @override
@@ -476,20 +551,31 @@ class _ToggleableButtonState<T> extends State<ToggleableButton<T>> {
   }
 
   @override
+  void didUpdateWidget(covariant ToggleableButton<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      oldWidget.value?.removeListener(_onValueChanged);
+      value?.addListener(_onValueChanged);
+    }
+  }
+
+  @override
   void initState() {
-    _toggleOn = _isToggledOn(widget.value.value);
-    widget.value.addListener(_onValueChanged);
+    value = widget.value;
+    _toggleOn = _isToggledOn(value?.value);
+    value?.addListener(_onValueChanged);
+
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.value.removeListener(_onValueChanged);
+    value?.removeListener(_onValueChanged);
     super.dispose();
   }
 
   void _onValueChanged() {
-    final result = _isToggledOn(widget.value.value);
+    final result = _isToggledOn(value?.value);
     if (mounted && result != _toggleOn) {
       _toggleOn = result;
       setState(() {});

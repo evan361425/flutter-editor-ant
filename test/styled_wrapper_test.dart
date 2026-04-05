@@ -20,7 +20,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final wrapper = StyledWrapper.of(context);
+      final wrapper = StyledWrapper.of<StyledText>(context);
       expect(wrapper, isNotNull);
     });
   });

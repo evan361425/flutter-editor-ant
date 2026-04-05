@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
             tooltipTheme: TooltipThemeData(preferBelow: false),
           ),
           themeMode: value,
-          home: Scaffold(body: _buildBody(context)),
+          home: Scaffold(body: SafeArea(child: _buildBody(context))),
         );
       },
     );
@@ -90,6 +90,8 @@ class _EditorState extends State<_Editor> {
   final MenuController _textAlignController = MenuController();
   final MenuController _placeholderController = MenuController();
 
+  late final DynamicDatePlaceholder _datePlaceholder;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -133,14 +135,8 @@ class _EditorState extends State<_Editor> {
           child: Row(
             spacing: 2.0,
             children: [
-              FontSizeField(
-                key: const Key('editor_ant.font_size_field'),
-                controller: _fontSizeController,
-                styledTextController: _controller,
-                styledTextFocusNode: _focusNode,
-              ),
+              FontSizeField(key: const Key('editor_ant.font_size_field'), controller: _fontSizeController),
               ColorSelector(
-                value: _controller.activeStyle,
                 controller: _colorController,
                 colors: [
                   [null, Colors.black87, Colors.white, Colors.grey],
@@ -161,35 +157,23 @@ class _EditorState extends State<_Editor> {
                   'Blue',
                   'Purple',
                 ],
-                styledEditingController: _controller,
-                propagateTo: _focusNode,
               ),
               // Style buttons
               VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-              BoldButton(value: _controller.activeStyle),
-              ItalicButton(value: _controller.activeStyle),
-              StrikethroughButton(value: _controller.activeStyle),
-              UnderlineButton(value: _controller.activeStyle),
+              BoldButton(),
+              ItalicButton(),
+              StrikethroughButton(),
+              UnderlineButton(),
               // Paragraph styles
               VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
-              TextAlignSelector(
-                value: _textAlign,
-                controller: _textAlignController,
-                onSelected: (align) {
-                  _focusNode.requestFocus();
-                },
-              ),
+              TextAlignSelector(value: _textAlign, controller: _textAlignController),
               PlaceholderSelector(
                 controller: _placeholderController,
                 placeholders: [
-                  TextPlaceholder(id: 'a', text: 'TemplateA'),
+                  _datePlaceholder.placeholder,
                   TextPlaceholder(id: 'b', text: 'TemplateB'),
                   TextPlaceholder(id: 'c', text: 'TemplateC'),
                 ],
-                styledEditingController: _controller,
-                onSelected: (_) {
-                  _focusNode.requestFocus();
-                },
               ),
             ],
           ),
@@ -232,6 +216,7 @@ class _EditorState extends State<_Editor> {
     _focusNode = FocusNode();
     _colorController = MenuController();
     _fontSizeController = TextEditingController(text: defaultFontSize.toString());
+    _datePlaceholder = DynamicDatePlaceholder('yyyy-MM-dd', getContext: () => context);
   }
 
   @override
@@ -242,4 +227,70 @@ class _EditorState extends State<_Editor> {
     _fontSizeController.dispose();
     super.dispose();
   }
+}
+
+class DynamicDatePlaceholder {
+  String format;
+
+  DynamicPlaceholder? _placeholder;
+  late final FocusNode _focusNode;
+  final BuildContext Function() getContext;
+
+  DynamicDatePlaceholder(this.format, {required this.getContext});
+
+  DynamicPlaceholder get placeholder {
+    if (_placeholder == null) {
+      _focusNode = FocusNode();
+      _placeholder = DynamicPlaceholder(
+        id: 'date',
+        text: 'Date',
+        menuFocusNode: _focusNode,
+        menuChildrenBuilder: (text) => [MenuItemButton(child: Text(format), onPressed: () => _activate())],
+      );
+    }
+
+    return _placeholder!;
+  }
+
+  void _activate() async {
+    final result = await showDialog<String>(context: getContext(), builder: singleTextDialog(format));
+
+    if (result != null) {
+      format = result;
+    }
+  }
+}
+
+WidgetBuilder singleTextDialog(String init) {
+  final textController = TextEditingController(text: init);
+  final form = GlobalKey<FormState>();
+
+  return (context) {
+    void onSubmit(String? value) {
+      if (form.currentState!.validate()) {
+        Navigator.of(context).pop(value);
+      }
+    }
+
+    final local = MaterialLocalizations.of(context);
+    final textField = TextFormField(
+      key: const Key('text_dialog.text'),
+      controller: textController,
+      autofillHints: ['yyyy MM dd'],
+      onSaved: onSubmit,
+      onFieldSubmitted: onSubmit,
+      keyboardType: TextInputType.text,
+      decoration: InputDecoration.collapsed(hintText: 'hello world'),
+      textInputAction: TextInputAction.done,
+    );
+
+    return AlertDialog(
+      scrollable: true,
+      content: Form(key: form, child: textField),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(local.cancelButtonLabel)),
+        FilledButton(onPressed: () => onSubmit(textController.text), child: Text(local.okButtonLabel)),
+      ],
+    );
+  };
 }
