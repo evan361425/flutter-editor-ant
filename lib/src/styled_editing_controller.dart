@@ -104,11 +104,11 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
 
     if (start >= 0) {
       final index = placeholders.indexWhere((p) => p.index >= start);
-      placeholders.insert(index == -1 ? placeholders.length : index, IndexPlaceholder.from(start, placeholder));
       value = value.copyWith(
         text: text.replaceRange(start, end, TextPlaceholder.char),
         selection: TextSelection.collapsed(offset: start + 1),
       );
+      placeholders.insert(index == -1 ? placeholders.length : index, IndexPlaceholder.from(start, placeholder));
     }
   }
 
@@ -190,9 +190,9 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       styles.addAll(result);
     } else {
       _resetActiveStyle();
-      // TODO: If text changed, we need to reset styles in the changed range,
-      // for example copy/paste same size of text.
-      // but this will check character by character every time when cursor moves,
+
+      // if select a placeholder and replace it with char, we should remove the placeholder
+      placeholders.removeWhere((p) => text.codeUnitAt(p.index) != TextPlaceholder.rune);
       return;
     }
 
@@ -212,9 +212,11 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         for (final placeholder in placeholders) {
           final idx = placeholder.index - offset;
           if (idx >= start && idx < end) {
-            children.add(TextSpan(text: text.substring(start, idx - 1), style: style));
+            if (idx != start) {
+              children.add(TextSpan(text: text.substring(start, idx), style: style));
+            }
             children.add(placeholder.buildSpan(style));
-            start = idx;
+            start = idx + 1;
           }
         }
       }
@@ -223,6 +225,10 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     }
 
     for (final style in styles) {
+      if (style.range.start < offset) {
+        continue;
+      }
+
       // Add unstyled text before this span
       if (currentIndex < style.range.start - offset) {
         addSpan(currentIndex, style.range.start - offset);

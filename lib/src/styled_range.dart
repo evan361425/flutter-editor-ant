@@ -75,6 +75,6 @@ abstract class StyledRange<T extends StyledRange<T>> {
   TextStyle toTextStyle();
 }
 
-abstract class Part<T> {
-  InlineSpan buildSpan(T value);
+abstract class Part {
+  const Part();
 }

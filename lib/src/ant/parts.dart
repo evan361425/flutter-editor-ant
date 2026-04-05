@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import '../styled_editing_controller.dart';
 import '../styled_range.dart';
 import 'styled_text.dart';
@@ -43,32 +41,22 @@ extension AntPart on StyledEditingController<StyledText> {
   }
 }
 
-class StyledPart extends Part<int> {
+class StyledPart extends Part {
   /// The text content of this part.
   final String text;
 
   /// The style applied to this part, if any.
   final StyledText? style;
 
-  StyledPart(this.text, [this.style]);
-
-  @override
-  InlineSpan buildSpan([int? _]) {
-    return TextSpan(text: text, style: style?.toTextStyle());
-  }
+  const StyledPart(this.text, [this.style]);
 }
 
-class PlaceholderPart extends Part<String> {
+class PlaceholderPart extends Part {
   /// The unique identifier for this placeholder.
   final String id;
 
   /// The style applied to this placeholder, if any.
   final StyledText? style;
 
-  PlaceholderPart({required this.id, this.style});
-
-  @override
-  InlineSpan buildSpan(String text) {
-    return TextSpan(text: text, style: style?.toTextStyle());
-  }
+  const PlaceholderPart({required this.id, this.style});
 }

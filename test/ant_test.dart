@@ -95,10 +95,11 @@ void main() {
             body: SizedBox(
               width: 100,
               height: 100,
-              child: FontSizeField(
-                key: const Key('font_size_field'),
-                controller: controller,
-                styledTextController: styledEditingController,
+              child: StyledWrapper(
+                controller: styledEditingController,
+                focusNode: FocusNode(),
+                intents: <StyledIntent<StyledText>>[],
+                child: FontSizeField(key: const Key('font_size_field'), controller: controller),
               ),
             ),
           ),
@@ -188,13 +189,17 @@ void main() {
           home: Scaffold(
             body: SizedBox.fromSize(
               size: const Size(300, 100),
-              child: ColorSelector(
-                value: value,
-                controller: controller,
-                colors: [
-                  [null, Colors.black87, Colors.white],
-                ],
-                styledEditingController: styledEditingController,
+              child: StyledWrapper(
+                controller: styledEditingController,
+                focusNode: FocusNode(),
+                intents: <StyledIntent<StyledText>>[],
+                child: ColorSelector(
+                  value: value,
+                  controller: controller,
+                  colors: [
+                    [null, Colors.black87, Colors.white],
+                  ],
+                ),
               ),
             ),
           ),
@@ -206,6 +211,51 @@ void main() {
 
       expect(find.byIcon(Icons.format_color_reset), findsOneWidget);
     });
+  });
+
+  testWidgets('didUpdateWidget', (tester) async {
+    var controller = StyledEditingController<StyledText>();
+    final notifier = ValueNotifier(FocusNode());
+    ValueNotifier<StyledText?>? style;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder(
+            valueListenable: notifier,
+            builder: (context, value, child) {
+              return Column(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      notifier.value = FocusNode();
+                      controller = StyledEditingController<StyledText>();
+                      style = style == null ? ValueNotifier(null) : null;
+                    },
+                    child: Text('swap'),
+                  ),
+                  StyledWrapper(
+                    controller: controller,
+                    focusNode: value,
+                    child: BoldButton(value: style),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('swap'));
+    await tester.pumpAndSettle();
+
+    expect(style, isNotNull);
+
+    await tester.tap(find.text('swap'));
+    await tester.pumpAndSettle();
+
+    expect(style, isNull);
   });
 
   group('AntPart', () {
@@ -233,9 +283,6 @@ void main() {
       expect(styledParts[2].style?.isBold, isTrue);
       expect(styledParts[3].text, 'd');
       expect(styledParts[3].style, isNull);
-
-      expect(styledParts[0].buildSpan(), isNotNull);
-      expect(placeholderParts[0].buildSpan('hi'), isNotNull);
     });
   });
 }

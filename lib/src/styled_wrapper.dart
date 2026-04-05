@@ -3,15 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// [StyledWrapper] facilitates button styling (e.g., bold, italic) and shortcut support with minimal code.
-class StyledWrapper extends StatefulWidget {
+class StyledWrapper<T extends StyledRange<T>> extends StatefulWidget {
   /// Controller managing the styled text.
-  final StyledEditingController controller;
+  final StyledEditingController<T> controller;
 
   /// Focus node for the styled text editor.
   final FocusNode? focusNode;
 
   /// List of styling intents (e.g., bold, italic).
-  final List<StyledIntent> intents;
+  final List<StyledIntent<T>> intents;
 
   /// Child widget to be wrapped.
   final Widget child;
@@ -25,14 +25,14 @@ class StyledWrapper extends StatefulWidget {
   });
 
   /// Retrieve the nearest [StyledWrapperState] from the widget tree.
-  static StyledWrapperState? maybeOf(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<_StyledScope>();
+  static StyledWrapperState<U>? maybeOf<U extends StyledRange<U>>(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<_StyledScope<U>>();
     return scope?._styledState;
   }
 
   /// Retrieve the nearest [StyledWrapperState] from the widget tree, asserting its existence.
-  static StyledWrapperState of(BuildContext context) {
-    final StyledWrapperState? state = maybeOf(context);
+  static StyledWrapperState<U> of<U extends StyledRange<U>>(BuildContext context) {
+    final StyledWrapperState<U>? state = maybeOf<U>(context);
     assert(
       state != null,
       'StyledWrapper.of() was called with a context '
@@ -48,11 +48,15 @@ class StyledWrapper extends StatefulWidget {
   }
 
   @override
-  StyledWrapperState createState() => StyledWrapperState();
+  StyledWrapperState<T> createState() => StyledWrapperState<T>();
 }
 
 /// State class for [StyledWrapper].
-class StyledWrapperState extends State<StyledWrapper> {
+class StyledWrapperState<T extends StyledRange<T>> extends State<StyledWrapper<T>> {
+  late StyledEditingController<T> controller;
+
+  late FocusNode? focusNode;
+
   late final Map<Type, Object? Function([Intent?])> _invoker;
 
   @override
@@ -70,11 +74,26 @@ class StyledWrapperState extends State<StyledWrapper> {
   }
 
   @override
+  void didUpdateWidget(covariant StyledWrapper<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.dispose();
+      controller = widget.controller;
+    }
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode?.dispose();
+      focusNode = widget.focusNode;
+    }
+  }
+
+  @override
   void initState() {
+    controller = widget.controller;
+    focusNode = widget.focusNode;
     _invoker = {
       for (final intent in widget.intents)
         intent.runtimeType: ([Intent? i]) {
-          widget.controller.addStyle(intent.styler(widget.controller.selection));
+          controller.addStyle(intent.styler(controller.selection));
           widget.focusNode?.requestFocus();
           return null;
         },
@@ -83,8 +102,9 @@ class StyledWrapperState extends State<StyledWrapper> {
   }
 
   /// Retrieve the [StyledIntent] of a specific type which can be used to create buttons like tooltips.
-  StyledIntent getIntent(Type intentType) {
-    return widget.intents.firstWhere((intent) => intent.runtimeType == intentType);
+  StyledIntent? getIntent(Type intentType) {
+    final idx = widget.intents.indexWhere((intent) => intent.runtimeType == intentType);
+    return idx != -1 ? widget.intents[idx] : null;
   }
 
   /// Retrieve the invoker function for a specific intent type.
@@ -123,10 +143,10 @@ class StyledIntent<T extends StyledRange<T>> extends Intent {
   }
 }
 
-class _StyledScope extends InheritedWidget {
-  const _StyledScope({required super.child, required StyledWrapperState styledState}) : _styledState = styledState;
+class _StyledScope<T extends StyledRange<T>> extends InheritedWidget {
+  const _StyledScope({required super.child, required StyledWrapperState<T> styledState}) : _styledState = styledState;
 
-  final StyledWrapperState _styledState;
+  final StyledWrapperState<T> _styledState;
 
   @override // coverage:ignore-line
   bool updateShouldNotify(_StyledScope old) => false;
