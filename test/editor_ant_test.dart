@@ -322,6 +322,15 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Date'));
       await tester.pumpAndSettle();
+      // await tester.tap(find.byKey(const Key('editor_ant.editor')));
+      // await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Date'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('yyyy'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
 
       controller.selection = const TextSelection.collapsed(offset: 8);
 

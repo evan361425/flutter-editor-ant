@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/widgets.dart';
 
 import 'placeholders.dart';
@@ -7,14 +9,17 @@ import 'util.dart';
 /// A [TextEditingController] that supports styled text ranges.
 class StyledEditingController<T extends StyledRange<T>> extends TextEditingController {
   String _previousText = '';
-  final List<T> styles = [];
-  final List<IndexPlaceholder> placeholders = [];
+  final List<T> _styles = [];
+  final List<IndexPlaceholder> _placeholders = [];
   ValueNotifier<T?> activeStyle = ValueNotifier<T?>(null);
 
   StyledEditingController({super.text}) {
     _previousText = text;
     addListener(_onChanged);
   }
+
+  UnmodifiableListView<T> get styles => UnmodifiableListView<T>(_styles);
+  UnmodifiableListView<IndexPlaceholder> get placeholders => UnmodifiableListView<IndexPlaceholder>(_placeholders);
 
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
@@ -72,7 +77,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
 
     final range = _getOverlapRange(other.range);
     if (range[1] == -1) {
-      styles.insert(range[0], other);
+      _styles.insert(range[0], other);
       if (EditorAntConfig.enableLogging) {
         logging('$other at ${range[0]}', 'Inserted');
       }
@@ -83,13 +88,13 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       return;
     }
 
-    final toggle = inProcess ? false : _isRangeToggleable(other, styles.sublist(range[0], range[1]));
-    final result = _normalizeStyles(other, styles.sublist(range[0], range[1]), toggle);
+    final toggle = inProcess ? false : _isRangeToggleable(other, _styles.sublist(range[0], range[1]));
+    final result = _normalizeStyles(other, _styles.sublist(range[0], range[1]), toggle);
 
-    styles.removeRange(range[0], range[1]);
-    styles.insertAll(range[0], result.where((span) => !span.range.isCollapsed));
+    _styles.removeRange(range[0], range[1]);
+    _styles.insertAll(range[0], result.where((span) => !span.range.isCollapsed));
     if (EditorAntConfig.enableLogging) {
-      logging(styles.join(', '), 'Inserted');
+      logging(_styles.join(', '), 'Inserted');
     }
     if (!inProcess) {
       _mergeStyles();
@@ -103,13 +108,33 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     final end = selection.extentOffset;
 
     if (start >= 0) {
-      final index = placeholders.indexWhere((p) => p.index >= start);
+      final index = _placeholders.indexWhere((p) => p.index >= start);
       value = value.copyWith(
         text: text.replaceRange(start, end, TextPlaceholder.char),
         selection: TextSelection.collapsed(offset: start + 1),
       );
-      placeholders.insert(index == -1 ? placeholders.length : index, IndexPlaceholder.from(start, placeholder));
+      _placeholders.insert(index == -1 ? _placeholders.length : index, IndexPlaceholder(start, placeholder));
     }
+  }
+
+  void resetText({required String text, List<T>? styles, List<IndexPlaceholder>? placeholders}) {
+    _previousText = text;
+    _styles.clear();
+    _placeholders.clear();
+    if (styles != null) {
+      _styles.addAll(styles);
+      // after value update, the styles will be reset.
+      _mergeStyles(resetActiveStyle: false);
+    }
+    if (placeholders != null) {
+      _placeholders.addAll(placeholders);
+    }
+
+    value = value.copyWith(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+      composing: TextRange.empty,
+    );
   }
 
   /// Handle text or selection changes and update style ranges accordingly
@@ -128,7 +153,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       final int length = newLength - oldLength;
       final int start = selection.start - length;
 
-      for (final style in styles.reversed) {
+      for (final style in _styles.reversed) {
         // TODO: what if text direction is RTL?
         // Before, after, overlap
         if (style.range.end < start) {
@@ -141,7 +166,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         }
       }
 
-      for (final placeholder in placeholders.reversed) {
+      for (final placeholder in _placeholders.reversed) {
         if (placeholder.index < start) {
           break;
         }
@@ -162,7 +187,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
 
       // Update all styles affected by deletion
       final List<T> result = [];
-      for (final style in styles) {
+      for (final style in _styles) {
         // Before, after, overlap
         if (style.range.end <= start) {
           result.add(style);
@@ -178,21 +203,21 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
         }
       }
 
-      placeholders.removeWhere((p) => p.index >= start && p.index < end);
-      for (final placeholder in placeholders.reversed) {
+      _placeholders.removeWhere((p) => p.index >= start && p.index < end);
+      for (final placeholder in _placeholders.reversed) {
         if (placeholder.index < start) {
           break;
         }
         placeholder.index -= length;
       }
 
-      styles.clear();
-      styles.addAll(result);
+      _styles.clear();
+      _styles.addAll(result);
     } else {
       _resetActiveStyle();
 
       // if select a placeholder and replace it with char, we should remove the placeholder
-      placeholders.removeWhere((p) => text.codeUnitAt(p.index) != TextPlaceholder.rune);
+      _placeholders.removeWhere((p) => text.codeUnitAt(p.index) != TextPlaceholder.rune);
       return;
     }
 
@@ -208,14 +233,14 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     int currentIndex = 0;
 
     void addSpan(int start, int end, [TextStyle? style]) {
-      if (placeholders.isNotEmpty) {
-        for (final placeholder in placeholders) {
+      if (_placeholders.isNotEmpty) {
+        for (final placeholder in _placeholders) {
           final idx = placeholder.index - offset;
           if (idx >= start && idx < end) {
             if (idx != start) {
               children.add(TextSpan(text: text.substring(start, idx), style: style));
             }
-            children.add(placeholder.buildSpan(style));
+            children.add(placeholder.placeholder.buildSpan(style));
             start = idx + 1;
           }
         }
@@ -224,7 +249,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       children.add(TextSpan(text: text.substring(start, end), style: style));
     }
 
-    for (final style in styles) {
+    for (final style in _styles) {
       if (style.range.start < offset) {
         continue;
       }
@@ -303,19 +328,22 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
   }
 
   /// Merge connected styles with the same style.
-  void _mergeStyles() {
-    for (int i = styles.length - 2; i >= 0; i--) {
-      final style = styles[i];
-      final next = styles[i + 1];
+  void _mergeStyles({bool resetActiveStyle = true}) {
+    for (int i = _styles.length - 2; i >= 0; i--) {
+      final style = _styles[i];
+      final next = _styles[i + 1];
       if (style.inConnected(next) && next == style) {
         if (EditorAntConfig.enableLogging) {
           logging('$style + $next', 'Merging');
         }
-        styles[i] = style.copyWith(end: next.range.end);
-        styles.removeAt(i + 1);
+        _styles[i] = style.copyWith(end: next.range.end);
+        _styles.removeAt(i + 1);
       }
     }
-    _resetActiveStyle();
+
+    if (resetActiveStyle) {
+      _resetActiveStyle();
+    }
   }
 
   /// Get the range of styles that overlap with [target].
@@ -326,8 +354,8 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
   /// Start index is inclusive, end index is exclusive.
   List<int> _getOverlapRange(TextRange target) {
     int start = -1;
-    for (int i = 0; i < styles.length; i++) {
-      final style = styles[i];
+    for (int i = 0; i < _styles.length; i++) {
+      final style = _styles[i];
       if (style.range.start < target.end && style.range.end > target.start) {
         if (start == -1) {
           start = i;
@@ -337,11 +365,11 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       }
     }
     if (start != -1) {
-      return [start, styles.length];
+      return [start, _styles.length];
     }
 
-    final beforeAt = styles.indexWhere((sp) => sp.range.start >= target.end);
-    return [beforeAt == -1 ? styles.length : beforeAt, -1];
+    final beforeAt = _styles.indexWhere((sp) => sp.range.start >= target.end);
+    return [beforeAt == -1 ? _styles.length : beforeAt, -1];
   }
 
   /// Check if [target] is fully covered by existing [styles] with the same
@@ -386,8 +414,10 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     final start = selection.isCollapsed ? selection.start : selection.start + 1;
 
     final List<T> checkStyles = [];
-    for (final style in styles) {
-      // check connected styles
+    for (final style in _styles) {
+      // find combination style that has overlap between multiple styles,
+      // for example, if we have bold+italic from 0 to 5 and italic from 2 to 4,
+      // when cursor is at 3, we should show italic only.
       if (checkStyles.isNotEmpty) {
         final last = checkStyles.last;
         if (style.range.start == last.range.end) {

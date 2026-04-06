@@ -90,7 +90,7 @@ class _EditorState extends State<_Editor> {
   final MenuController _textAlignController = MenuController();
   final MenuController _placeholderController = MenuController();
 
-  late final DynamicDatePlaceholder _datePlaceholder;
+  late final List<TextPlaceholder> placeholders;
 
   @override
   Widget build(BuildContext context) {
@@ -167,14 +167,7 @@ class _EditorState extends State<_Editor> {
               // Paragraph styles
               VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
               TextAlignSelector(value: _textAlign, controller: _textAlignController),
-              PlaceholderSelector(
-                controller: _placeholderController,
-                placeholders: [
-                  _datePlaceholder.placeholder,
-                  TextPlaceholder(id: 'b', text: 'TemplateB'),
-                  TextPlaceholder(id: 'c', text: 'TemplateC'),
-                ],
-              ),
+              PlaceholderSelector(controller: _placeholderController, placeholders: placeholders),
             ],
           ),
         ),
@@ -216,7 +209,17 @@ class _EditorState extends State<_Editor> {
     _focusNode = FocusNode();
     _colorController = MenuController();
     _fontSizeController = TextEditingController(text: defaultFontSize.toString());
-    _datePlaceholder = DynamicDatePlaceholder('yyyy-MM-dd', getContext: () => context);
+
+    placeholders = [
+      MenuPlaceholder(
+        id: 'date',
+        text: 'Date',
+        meta: 'yyyy',
+        onMenuSelected: (ph) => showDialog<String>(context: context, builder: singleTextDialog(ph.meta!)),
+      ),
+      TextPlaceholder(id: 'b', text: 'TemplateB'),
+      TextPlaceholder(id: 'c', text: 'TemplateC'),
+    ];
   }
 
   @override
@@ -226,38 +229,6 @@ class _EditorState extends State<_Editor> {
     _focusNode.dispose();
     _fontSizeController.dispose();
     super.dispose();
-  }
-}
-
-class DynamicDatePlaceholder {
-  String format;
-
-  DynamicPlaceholder? _placeholder;
-  late final FocusNode _focusNode;
-  final BuildContext Function() getContext;
-
-  DynamicDatePlaceholder(this.format, {required this.getContext});
-
-  DynamicPlaceholder get placeholder {
-    if (_placeholder == null) {
-      _focusNode = FocusNode();
-      _placeholder = DynamicPlaceholder(
-        id: 'date',
-        text: 'Date',
-        menuFocusNode: _focusNode,
-        menuChildrenBuilder: (text) => [MenuItemButton(child: Text(format), onPressed: () => _activate())],
-      );
-    }
-
-    return _placeholder!;
-  }
-
-  void _activate() async {
-    final result = await showDialog<String>(context: getContext(), builder: singleTextDialog(format));
-
-    if (result != null) {
-      format = result;
-    }
   }
 }
 
@@ -272,7 +243,6 @@ WidgetBuilder singleTextDialog(String init) {
       }
     }
 
-    final local = MaterialLocalizations.of(context);
     final textField = TextFormField(
       key: const Key('text_dialog.text'),
       controller: textController,
@@ -280,7 +250,7 @@ WidgetBuilder singleTextDialog(String init) {
       onSaved: onSubmit,
       onFieldSubmitted: onSubmit,
       keyboardType: TextInputType.text,
-      decoration: InputDecoration.collapsed(hintText: 'hello world'),
+      decoration: InputDecoration.collapsed(hintText: 'Date Format'),
       textInputAction: TextInputAction.done,
     );
 
@@ -288,8 +258,8 @@ WidgetBuilder singleTextDialog(String init) {
       scrollable: true,
       content: Form(key: form, child: textField),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(local.cancelButtonLabel)),
-        FilledButton(onPressed: () => onSubmit(textController.text), child: Text(local.okButtonLabel)),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
+        FilledButton(onPressed: () => onSubmit(textController.text), child: Text('OK')),
       ],
     );
   };

@@ -75,6 +75,11 @@ abstract class StyledRange<T extends StyledRange<T>> {
   TextStyle toTextStyle();
 }
 
-abstract class Part {
-  const Part();
+abstract class Part<T extends StyledRange<T>> {
+  /// The style applied to this part, if any.
+  final T? style;
+
+  const Part({this.style});
+
+  Map<String, dynamic> toJson();
 }

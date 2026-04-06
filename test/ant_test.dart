@@ -261,30 +261,63 @@ void main() {
   });
 
   group('AntPart', () {
-    test('toParts with styles and placeholders', () {
-      final text = 'Hello${TextPlaceholder.char}World';
-      final placeholder = TextPlaceholder(id: 'p1', text: 'P1');
+    test('toParts and fromParts', () {
+      final text = 'Hello${TextPlaceholder.char}${TextPlaceholder.char}WorldEvan';
+      final styles = [
+        StyledText(range: const TextRange(start: 1, end: 11), isBold: true),
+        StyledText(range: const TextRange(start: 12, end: 14), isBold: true),
+        StyledText(range: const TextRange(start: 14, end: 16), color: Colors.red),
+      ];
+      final placeholders = [
+        IndexPlaceholder(5, TextPlaceholder(id: 'p1', text: 'p1')),
+        IndexPlaceholder(6, MenuPlaceholder(id: 'p2', text: 'p2', meta: 'meta', onMenuSelected: (_) async => null)),
+      ];
+      final expectedResult = [
+        ['H', null],
+        ['ello', StyledText(isBold: true, range: TextRange.empty)],
+        ['Worl', StyledText(isBold: true, range: TextRange.empty)],
+        ['d', null],
+        ['Ev', StyledText(isBold: true, range: TextRange.empty)],
+        ['an', StyledText(color: Colors.red, range: TextRange.empty)],
+      ];
       final controller = StyledEditingController<StyledText>();
-      controller.value = TextEditingValue(text: text);
-      controller.styles.add(StyledText(range: const TextRange(start: 1, end: 10), isBold: true));
-      controller.placeholders.add(IndexPlaceholder.from(5, placeholder));
+      controller.resetText(text: text, styles: styles, placeholders: placeholders);
 
       final parts = controller.toParts();
-      // Should contain: StyledPart('Hello', bold), PlaceholderPart, StyledPart('World', bold)
-      expect(parts.length, equals(5));
-      // Find the sequence: StyledPart, PlaceholderPart, StyledPart
-      final styledParts = parts.whereType<StyledPart>().toList();
+      final styledParts = parts.where((e) => e is! PlaceholderPart).cast<StyledPart>().toList();
       final placeholderParts = parts.whereType<PlaceholderPart>().toList();
-      expect(styledParts.length, equals(4));
-      expect(placeholderParts.length, equals(1));
-      expect(styledParts[0].text, 'H');
-      expect(styledParts[0].style, isNull);
-      expect(styledParts[1].text, 'ello');
-      expect(styledParts[1].style?.isBold, isTrue);
-      expect(styledParts[2].text, 'Worl');
-      expect(styledParts[2].style?.isBold, isTrue);
-      expect(styledParts[3].text, 'd');
-      expect(styledParts[3].style, isNull);
+      expect(styledParts.length, equals(6));
+      expect(placeholderParts.length, equals(2));
+      for (int i = 0; i < 6; i++) {
+        expect(styledParts[i].text, expectedResult[i][0]);
+        expect(styledParts[i].style, expectedResult[i][1]);
+      }
+
+      final list = parts.map((e) => e.toJson()).toList();
+      final newParts = list.map(partFromJson).toList();
+
+      for (int i = 0; i < parts.length; i++) {
+        expect(newParts[i].toJson(), equals(parts[i].toJson()));
+      }
+
+      controller.fromParts(parts: newParts);
+
+      for (int i = 0; i < controller.styles.length; i++) {
+        expect(controller.styles[i], styles[i]);
+        expect(controller.styles[i].range, styles[i].range);
+      }
+      for (int i = 0; i < controller.placeholders.length; i++) {
+        expect(controller.placeholders[i].index, placeholders[i].index);
+        expect(controller.placeholders[i].text, placeholders[i].text);
+        expect(controller.placeholders[i].id, placeholders[i].id);
+        if (i == 1) {
+          final p1 = controller.placeholders[i].placeholder;
+          final p2 = placeholders[i].placeholder;
+          expect(p1, isA<MenuPlaceholder>());
+          expect(p2, isA<MenuPlaceholder>());
+          expect((p1 as MenuPlaceholder).meta, (p2 as MenuPlaceholder).meta);
+        }
+      }
     });
   });
 }

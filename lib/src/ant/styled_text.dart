@@ -117,7 +117,7 @@ class StyledText extends StyledRange<StyledText> {
         isStrikethrough == other.isStrikethrough &&
         isUnderline == other.isUnderline &&
         fontSize == other.fontSize &&
-        color == other.color;
+        color?.toARGB32() == other.color?.toARGB32();
   }
 
   @override
