@@ -20,9 +20,9 @@ TextPlaceholder _defaultInPlaceholderParser(PlaceholderPart placeholder) => plac
 
 extension AntPart on StyledEditingController<StyledText> {
   /// Converts the current text, styles, and placeholders in the controller to a list of [Part]s.
-  List<Part> toParts({OutPlaceholderParser placeholderParser = _defaultOutPlaceholderParser}) {
+  List<StyledPart> toParts({OutPlaceholderParser placeholderParser = _defaultOutPlaceholderParser}) {
     final text = value.text;
-    final List<Part> parts = [];
+    final List<StyledPart> parts = [];
 
     void addPart(int start, int end, [StyledText? style]) {
       for (final placeholder in placeholders) {
@@ -58,7 +58,10 @@ extension AntPart on StyledEditingController<StyledText> {
   }
 
   /// Updates the controller's text, styles, and placeholders based on a list of [Part]s.
-  void fromParts({required List<Part> parts, InPlaceholderParser placeholderParser = _defaultInPlaceholderParser}) {
+  void fromParts({
+    required List<StyledPart> parts,
+    InPlaceholderParser placeholderParser = _defaultInPlaceholderParser,
+  }) {
     final StringBuffer textBuffer = StringBuffer();
     final styles = <StyledText>[];
     final placeholders = <IndexPlaceholder>[];
@@ -72,7 +75,7 @@ extension AntPart on StyledEditingController<StyledText> {
         textBuffer.write(TextPlaceholder.char);
         partStyle = part.style;
         placeholders.add(IndexPlaceholder(start, placeholderParser(part)));
-      } else if (part is StyledPart) {
+      } else {
         textBuffer.write(part.text);
         partStyle = part.style;
       }
@@ -107,7 +110,7 @@ extension AntPart on StyledEditingController<StyledText> {
   }
 }
 
-Part<StyledText> partFromJson(Map<String, dynamic> json) {
+StyledPart partFromJson(Map<String, dynamic> json) {
   final type = json['type'] as String? ?? 'styled';
   switch (type) {
     case 'placeholder':
