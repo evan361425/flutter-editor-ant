@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.2] - 2026-04-12
+
+### Fixed
+
+- ([41bae52](https://github.com/evan361425/flutter-editor-ant/commit/41bae52f82148bf4c051c29e48ba8f29eb3b0816)) allow nullable create styled text - @wu0dj2k7ao3
+
 ## [v1.3.1] - 2026-04-11
 
 ### Fixed
@@ -52,7 +58,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.1...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.2...HEAD
+[v1.3.2]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.1...v1.3.2
 [v1.3.1]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.0...v1.3.1
 [v1.3.0]: https://github.com/evan361425/flutter-editor-ant/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/evan361425/flutter-editor-ant/compare/v1.1.0...v1.2.0
