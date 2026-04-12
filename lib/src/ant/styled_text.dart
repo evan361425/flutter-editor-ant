@@ -41,6 +41,34 @@ class StyledText extends StyledRange<StyledText> {
     this.resetColor = false,
   });
 
+  static StyledText? nullableFactory({
+    bool? isBold,
+    bool? isItalic,
+    bool? isStrikethrough,
+    bool? isUnderline,
+    int? fontSize,
+    Color? color,
+  }) {
+    if (isBold != null ||
+        isItalic != null ||
+        isStrikethrough != null ||
+        isUnderline != null ||
+        fontSize != null ||
+        color != null) {
+      return StyledText(
+        range: TextRange.empty,
+        isBold: isBold ?? false,
+        isItalic: isItalic ?? false,
+        isStrikethrough: isStrikethrough ?? false,
+        isUnderline: isUnderline ?? false,
+        fontSize: fontSize,
+        color: color,
+      );
+    }
+
+    return null;
+  }
+
   @override
   StyledText copyWith({
     int? start,
