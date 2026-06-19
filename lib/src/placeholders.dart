@@ -97,7 +97,7 @@ class MenuPlaceholder<T> extends TextPlaceholder {
          menuChildrenBuilder != null || onMenuSelected != null,
          'Must have menuChildrenBuilder or onMenuSelected set',
        ),
-       textNotifier = ValueNotifier(''),
+       textNotifier = ValueNotifier(text),
        menuChildrenBuilder =
            menuChildrenBuilder ??
            ((MenuPlaceholder<T> placeholder) => [

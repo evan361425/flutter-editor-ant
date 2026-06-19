@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:editor_ant/editor_ant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,15 +7,41 @@ import 'package:google_fonts/google_fonts.dart';
 void main() async {
   EditorAntConfig.enableLogging = true;
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp(fromTest: false));
+  runApp(
+    MyApp(
+      fromTest: false,
+      parts: [
+        {"type": "styled", "text": "EditorAnt", "color": 4294940672},
+        {"type": "styled", "text": " is a "},
+        {"type": "styled", "text": "dependency-free", "isItalic": true},
+        {"type": "styled", "text": " editor leverages the "},
+        {"type": "styled", "text": "native Flutter editor", "fontSize": 20},
+        {"type": "styled", "text": " functionality without the need for "},
+        {"type": "styled", "text": "extensive widget customization", "isStrikethrough": true},
+        {"type": "styled", "text": " which we believe will "},
+        {"type": "styled", "text": "be more stable", "isUnderline": true},
+        {
+          "type": "styled",
+          "text":
+              " and long term support.\n\nThe main different feature we have between other editor is placeholder: an object inside text that can become a placeholder for a template like ",
+        },
+        {"type": "placeholder", "text": "b"},
+        {"type": "styled", "text": " and clickable "},
+        {"type": "meta_placeholder", "text": "date", "meta": "yyyy"},
+        {"type": "styled", "text": " for adding detailed settings in it."},
+      ].map((e) => partFromJson(e)).toList(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final bool fromTest;
 
+  final List<StyledPart> parts;
+
   static final ValueNotifier<ThemeMode> themeMode = ValueNotifier(ThemeMode.system);
 
-  const MyApp({super.key, this.fromTest = true});
+  const MyApp({super.key, this.fromTest = true, this.parts = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +72,7 @@ class MyApp extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    if (fromTest) return _Editor();
+    if (fromTest) return _Editor(parts: parts);
 
     return Center(
       child: SizedBox(
@@ -52,7 +80,7 @@ class MyApp extends StatelessWidget {
         height: 650,
         child: Stack(
           children: [
-            Card(child: _Editor()),
+            Card(child: _Editor(parts: parts)),
             Positioned(
               bottom: 32,
               left: 0,
@@ -73,7 +101,9 @@ class MyApp extends StatelessWidget {
 }
 
 class _Editor extends StatefulWidget {
-  const _Editor();
+  final List<StyledPart> parts;
+
+  const _Editor({this.parts = const []});
 
   @override
   State<_Editor> createState() => _EditorState();
@@ -168,6 +198,10 @@ class _EditorState extends State<_Editor> {
               VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
               TextAlignSelector(value: _textAlign, controller: _textAlignController),
               PlaceholderSelector(controller: _placeholderController, placeholders: placeholders),
+              IconButton(
+                onPressed: () => print(jsonEncode(_controller.toParts().map((e) => e.toJson()).toList())),
+                icon: Icon(Icons.bug_report),
+              ),
             ],
           ),
         ),
@@ -220,6 +254,21 @@ class _EditorState extends State<_Editor> {
       TextPlaceholder(id: 'b', text: 'TemplateB'),
       TextPlaceholder(id: 'c', text: 'TemplateC'),
     ];
+    _controller.fromParts(
+      parts: widget.parts,
+      placeholderParser: (part) {
+        if (part is MenuPlaceholderPart) {
+          return MenuPlaceholder(
+            id: placeholders[0].id,
+            text: placeholders[0].text,
+            meta: part.meta,
+            onMenuSelected: (ph) => showDialog<String>(context: context, builder: singleTextDialog(ph.meta!)),
+          );
+        } else {
+          return part.text == 'b' ? placeholders[1] : placeholders[2];
+        }
+      },
+    );
   }
 
   @override

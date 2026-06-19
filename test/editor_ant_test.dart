@@ -360,6 +360,12 @@ void main() {
       expect(controller.placeholders[0].index, equals(4));
       expect(controller.placeholders[1].index, equals(7));
     });
+
+    test('MenuPlaceholder should use text in textNotifier', () {
+      final placeholder = MenuPlaceholder(id: 'test', text: 'Test', menuChildrenBuilder: (_) => []);
+      expect(placeholder.text, equals('Test'));
+      expect(placeholder.textNotifier.value, equals('Test'));
+    });
   });
 
   group('Fulfill test coverage', () {
