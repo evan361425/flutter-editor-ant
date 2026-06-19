@@ -8,6 +8,13 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.3] - 2026-06-19
+
+### Fixed
+
+- ([d070396](https://github.com/evan361425/flutter-editor-ant/commit/d070396cbc973c882316a2aa0bfe911d7f494706)) ignore printer action - @wu0dj2k7ao3
+- ([90e536c](https://github.com/evan361425/flutter-editor-ant/commit/90e536c3149194c510376948eae7575f1725d4e6)) new menu placeholder should update text notifier - @wu0dj2k7ao3
+
 ## [v1.3.2] - 2026-04-12
 
 ### Fixed
@@ -58,7 +65,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.2...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.3...HEAD
+[v1.3.3]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.2...v1.3.3
 [v1.3.2]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.1...v1.3.2
 [v1.3.1]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.0...v1.3.1
 [v1.3.0]: https://github.com/evan361425/flutter-editor-ant/compare/v1.2.0...v1.3.0
