@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:editor_ant/editor_ant.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -198,10 +196,10 @@ class _EditorState extends State<_Editor> {
               VerticalDivider(width: 1, thickness: 1, indent: 6, endIndent: 6),
               TextAlignSelector(value: _textAlign, controller: _textAlignController),
               PlaceholderSelector(controller: _placeholderController, placeholders: placeholders),
-              IconButton(
-                onPressed: () => print(jsonEncode(_controller.toParts().map((e) => e.toJson()).toList())),
-                icon: Icon(Icons.bug_report),
-              ),
+              // IconButton(
+              //   onPressed: () => print(jsonEncode(_controller.toParts().map((e) => e.toJson()).toList())),
+              //   icon: Icon(Icons.bug_report),
+              // ),
             ],
           ),
         ),
