@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.4] - 2026-07-25
+
+### Fixed
+
+- ([d92aadc](https://github.com/evan361425/flutter-editor-ant/commit/d92aadc248f459048ff9a15848a5ebca9bba64ce)) provide more options for placeholder selector - @wu0dj2k7ao3
+
 ## [v1.3.3] - 2026-06-19
 
 ### Fixed
@@ -65,7 +71,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.3...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.4...HEAD
+[v1.3.4]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.3...v1.3.4
 [v1.3.3]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.2...v1.3.3
 [v1.3.2]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.1...v1.3.2
 [v1.3.1]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.0...v1.3.1
