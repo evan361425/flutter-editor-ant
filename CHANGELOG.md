@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.5] - 2026-07-25
+
+### Fixed
+
+- ([fc9d3e1](https://github.com/evan361425/flutter-editor-ant/commit/fc9d3e16f9822701c99ddaaf5ac7f5f7463ebccd)) provide style for menu anchor - @wu0dj2k7ao3
+
 ## [v1.3.4] - 2026-07-25
 
 ### Fixed
@@ -71,7 +77,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.4...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.5...HEAD
+[v1.3.5]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.4...v1.3.5
 [v1.3.4]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.3...v1.3.4
 [v1.3.3]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.2...v1.3.3
 [v1.3.2]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.1...v1.3.2
