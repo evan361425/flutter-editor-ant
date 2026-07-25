@@ -388,6 +388,8 @@ class PlaceholderSelector extends StatelessWidget {
   final List<TextPlaceholder> placeholders;
   final List<String>? placeholderNames;
   final void Function(TextPlaceholder)? onSelected;
+  final bool useRootOverlay;
+  final List<Widget> Function(List<Widget> menuChildren)? menuChildrenWrapper;
 
   const PlaceholderSelector({
     super.key,
@@ -396,39 +398,44 @@ class PlaceholderSelector extends StatelessWidget {
     this.placeholders = const [TextPlaceholder(id: '_default', text: 'Placeholder')],
     this.placeholderNames,
     this.onSelected,
+    this.menuChildrenWrapper,
     this.tooltip = 'Placeholder',
+    this.useRootOverlay = false,
   });
 
   @override
   Widget build(BuildContext context) {
     int plcIndex = 0;
+    final menuChildren = <Widget>[
+      for (final placeholder in placeholders)
+        MenuItemButton(
+          onPressed: () {
+            // Delay the call to onPressed until post-frame so that the focus is
+            // restored to what it was before the menu was opened before the action is
+            // executed.
+            SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+              FocusManager.instance.applyFocusChangesIfNeeded();
+              final effectiveController = styledEditingController ?? StyledWrapper.of<StyledText>(context).controller;
+              effectiveController.addPlaceholder(placeholder.create());
+              StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
+              onSelected?.call(placeholder);
+            });
+            controller.close();
+          },
+          child: Text(placeholderNames?.elementAtOrNull(plcIndex++) ?? placeholder.text),
+        ),
+    ];
+
     return MenuAnchor(
       controller: controller,
+      useRootOverlay: useRootOverlay,
       builder: (context, controller, child) => IconButton(
         icon: Icon(Icons.data_object),
         tooltip: tooltip,
         style: IconButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0))),
         onPressed: controller.open,
       ),
-      menuChildren: [
-        for (final placeholder in placeholders)
-          MenuItemButton(
-            onPressed: () {
-              // Delay the call to onPressed until post-frame so that the focus is
-              // restored to what it was before the menu was opened before the action is
-              // executed.
-              SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-                FocusManager.instance.applyFocusChangesIfNeeded();
-                final effectiveController = styledEditingController ?? StyledWrapper.of<StyledText>(context).controller;
-                effectiveController.addPlaceholder(placeholder.create());
-                StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
-                onSelected?.call(placeholder);
-              });
-              controller.close();
-            },
-            child: Text(placeholderNames?.elementAtOrNull(plcIndex++) ?? placeholder.text),
-          ),
-      ],
+      menuChildren: menuChildrenWrapper?.call(menuChildren) ?? menuChildren,
     );
   }
 }
