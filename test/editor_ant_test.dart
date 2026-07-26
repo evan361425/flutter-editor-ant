@@ -362,9 +362,9 @@ void main() {
     });
 
     test('MenuPlaceholder should use text in textNotifier', () {
-      final placeholder = MenuPlaceholder(id: 'test', text: 'Test', menuChildrenBuilder: (_) => []);
+      final placeholder = MenuPlaceholder(id: 'test', text: 'Test', meta: 'Text', menuChildrenBuilder: (_) => []);
       expect(placeholder.text, equals('Test'));
-      expect(placeholder.textNotifier.value, equals('Test'));
+      expect(placeholder.metaNotifier.value, equals('Text'));
     });
   });
 

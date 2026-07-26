@@ -75,9 +75,9 @@ class MenuPlaceholder<T> extends TextPlaceholder {
   /// and returns a list of menu children for the [MenuAnchor].
   MenuChildBuilder<T> menuChildrenBuilder;
 
-  /// A [ValueNotifier] that holds the current text of the placeholder. This can be
-  /// used to update the placeholder's text dynamically when menu items are selected.
-  final ValueNotifier<String> textNotifier;
+  /// A [ValueNotifier] that holds the current meta of the placeholder. This can be
+  /// used to update the placeholder's meta dynamically.
+  final ValueNotifier<T?> metaNotifier;
 
   /// An optional [FocusNode] for the menu.
   final FocusNode? menuFocusNode;
@@ -97,7 +97,7 @@ class MenuPlaceholder<T> extends TextPlaceholder {
          menuChildrenBuilder != null || onMenuSelected != null,
          'Must have menuChildrenBuilder or onMenuSelected set',
        ),
-       textNotifier = ValueNotifier(text),
+       metaNotifier = ValueNotifier(meta),
        menuChildrenBuilder =
            menuChildrenBuilder ??
            ((MenuPlaceholder<T> placeholder) => [
@@ -106,9 +106,13 @@ class MenuPlaceholder<T> extends TextPlaceholder {
                  final result = await onMenuSelected!(placeholder);
                  if (result != null) {
                    placeholder.meta = result;
+                   placeholder.metaNotifier.value = result;
                  }
                },
-               child: Text(meta.toString()),
+               child: ValueListenableBuilder(
+                 valueListenable: placeholder.metaNotifier,
+                 builder: (context, value, child) => Text(value.toString()),
+               ),
              ),
            ]);
 
@@ -116,7 +120,7 @@ class MenuPlaceholder<T> extends TextPlaceholder {
     required super.id,
     required super.text,
     required this.menuChildrenBuilder,
-    required this.textNotifier,
+    required this.metaNotifier,
     this.menuFocusNode,
     this.meta,
   });
@@ -126,7 +130,7 @@ class MenuPlaceholder<T> extends TextPlaceholder {
     return MenuPlaceholder._(
       id: id,
       text: text,
-      textNotifier: ValueNotifier(text),
+      metaNotifier: ValueNotifier(meta),
       menuFocusNode: menuFocusNode,
       menuChildrenBuilder: menuChildrenBuilder,
       meta: meta,
@@ -151,12 +155,7 @@ class MenuPlaceholder<T> extends TextPlaceholder {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ValueListenableBuilder(
-          valueListenable: textNotifier,
-          builder: (context, value, child) {
-            return Text(value, style: _defaultPlaceholderStyle);
-          },
-        ),
+        Text(text, style: _defaultPlaceholderStyle),
         const SizedBox(width: 2),
         Icon(Icons.expand_more, size: 12, color: _defaultPlaceholderStyle.color),
       ],
