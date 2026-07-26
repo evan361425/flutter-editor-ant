@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.7] - 2026-07-26
+
+### Fixed
+
+- ([809b32c](https://github.com/evan361425/flutter-editor-ant/commit/809b32c0707655c8d66585db9e017e6b12f693bc)) use overlay to wrap the StyledWrapper - @wu0dj2k7ao3
+
 ## [v1.3.6] - 2026-07-25
 
 ### Fixed
@@ -83,7 +89,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.6...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.7...HEAD
+[v1.3.7]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.6...v1.3.7
 [v1.3.6]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.5...v1.3.6
 [v1.3.5]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.4...v1.3.5
 [v1.3.4]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.3...v1.3.4
