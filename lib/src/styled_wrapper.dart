@@ -13,6 +13,9 @@ class StyledWrapper<T extends StyledRange<T>> extends StatefulWidget {
   /// List of styling intents (e.g., bold, italic).
   final List<StyledIntent<T>> intents;
 
+  /// Mark this as true if child has no fixed size.
+  final bool canSizeOverlay;
+
   /// Child widget to be wrapped.
   final Widget child;
 
@@ -20,6 +23,7 @@ class StyledWrapper<T extends StyledRange<T>> extends StatefulWidget {
     super.key,
     required this.controller,
     this.focusNode,
+    this.canSizeOverlay = false,
     this.intents = const [],
     required this.child,
   });
@@ -59,9 +63,11 @@ class StyledWrapperState<T extends StyledRange<T>> extends State<StyledWrapper<T
 
   late final Map<Type, Object? Function([Intent?])> _invoker;
 
-  @override
-  Widget build(BuildContext context) {
-    return Shortcuts(
+  /// avoid keyboard overlapping
+  /// see: https://github.com/singerdmx/flutter-quill/issues/1697#issuecomment-2311548151
+  late final OverlayEntry _overlayEntry = OverlayEntry(
+    canSizeOverlay: widget.canSizeOverlay,
+    builder: (context) => Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{for (final intent in widget.intents) intent.activator: intent},
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -70,7 +76,12 @@ class StyledWrapperState<T extends StyledRange<T>> extends State<StyledWrapper<T
         },
         child: _StyledScope(styledState: this, child: widget.child),
       ),
-    );
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Overlay(initialEntries: [_overlayEntry]);
   }
 
   @override
@@ -84,6 +95,7 @@ class StyledWrapperState<T extends StyledRange<T>> extends State<StyledWrapper<T
       oldWidget.focusNode?.dispose();
       focusNode = widget.focusNode;
     }
+    _overlayEntry.markNeedsBuild();
   }
 
   @override

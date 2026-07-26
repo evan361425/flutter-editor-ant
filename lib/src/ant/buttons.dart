@@ -238,8 +238,8 @@ class ColorSelector extends StatelessWidget {
   final StyledEditingController<StyledText>? styledEditingController;
   final FocusNode? propagateTo;
   final String tooltip;
-  final MenuStyle? style;
-  final Offset? alignmentOffset;
+  final MenuStyle? menuStyle;
+  final Offset? menuAlignmentOffset;
 
   const ColorSelector({
     super.key,
@@ -249,8 +249,8 @@ class ColorSelector extends StatelessWidget {
     this.colorNames,
     this.styledEditingController,
     this.propagateTo,
-    this.style,
-    this.alignmentOffset,
+    this.menuStyle,
+    this.menuAlignmentOffset,
     this.tooltip = 'Text Color',
   });
 
@@ -263,8 +263,8 @@ class ColorSelector extends StatelessWidget {
     final effectiveValue = value ?? effectiveEditorController.activeStyle;
     return MenuAnchor(
       controller: controller,
-      style: style,
-      alignmentOffset: alignmentOffset,
+      style: menuStyle,
+      alignmentOffset: menuAlignmentOffset,
       builder: (context, controller, child) => ValueListenableBuilder(
         valueListenable: effectiveValue,
         builder: (context, value, child) {
@@ -333,8 +333,8 @@ class TextAlignSelector extends StatelessWidget {
   final List<TextAlign> alignments;
   final List<String>? alignmentNames;
   final void Function(TextAlign)? onSelected;
-  final MenuStyle? style;
-  final Offset? alignmentOffset;
+  final MenuStyle? menuStyle;
+  final Offset? menuAlignmentOffset;
 
   const TextAlignSelector({
     super.key,
@@ -343,8 +343,8 @@ class TextAlignSelector extends StatelessWidget {
     this.alignments = const [TextAlign.left, TextAlign.center, TextAlign.right],
     this.alignmentNames,
     this.onSelected,
-    this.style,
-    this.alignmentOffset,
+    this.menuStyle,
+    this.menuAlignmentOffset,
     this.tooltip = 'Text Alignment',
   });
 
@@ -353,8 +353,8 @@ class TextAlignSelector extends StatelessWidget {
     int alignmentIndex = 0;
     return MenuAnchor(
       controller: controller,
-      style: style,
-      alignmentOffset: alignmentOffset,
+      style: menuStyle,
+      alignmentOffset: menuAlignmentOffset,
       builder: (context, controller, child) => ValueListenableBuilder(
         valueListenable: value,
         builder: (context, value, child) {
@@ -400,10 +400,9 @@ class PlaceholderSelector extends StatelessWidget {
   final List<TextPlaceholder> placeholders;
   final List<String>? placeholderNames;
   final void Function(TextPlaceholder)? onSelected;
-  final bool useRootOverlay;
   final List<Widget> Function(List<Widget> menuChildren)? menuChildrenWrapper;
-  final MenuStyle? style;
-  final Offset? alignmentOffset;
+  final MenuStyle? menuStyle;
+  final Offset? menuAlignmentOffset;
 
   const PlaceholderSelector({
     super.key,
@@ -413,10 +412,9 @@ class PlaceholderSelector extends StatelessWidget {
     this.placeholderNames,
     this.onSelected,
     this.menuChildrenWrapper,
-    this.style,
-    this.alignmentOffset,
+    this.menuStyle,
+    this.menuAlignmentOffset,
     this.tooltip = 'Placeholder',
-    this.useRootOverlay = false,
   });
 
   @override
@@ -444,9 +442,8 @@ class PlaceholderSelector extends StatelessWidget {
 
     return MenuAnchor(
       controller: controller,
-      style: style,
-      alignmentOffset: alignmentOffset,
-      useRootOverlay: useRootOverlay,
+      style: menuStyle,
+      alignmentOffset: menuAlignmentOffset,
       builder: (context, controller, child) => IconButton(
         icon: Icon(Icons.data_object),
         tooltip: tooltip,

@@ -238,6 +238,7 @@ void main() {
                   StyledWrapper(
                     controller: controller,
                     focusNode: value,
+                    canSizeOverlay: true,
                     child: BoldButton(value: style),
                   ),
                 ],

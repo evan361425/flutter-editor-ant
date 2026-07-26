@@ -1,5 +1,5 @@
 import 'package:editor_ant/editor_ant.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -8,13 +8,17 @@ void main() {
       late BuildContext context;
 
       await tester.pumpWidget(
-        StyledWrapper(
-          controller: StyledEditingController<StyledText>(),
-          child: Builder(
-            builder: (ctx) {
-              context = ctx;
-              return const SizedBox();
-            },
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: StyledWrapper(
+            controller: StyledEditingController<StyledText>(),
+            canSizeOverlay: true,
+            child: Builder(
+              builder: (ctx) {
+                context = ctx;
+                return const SizedBox(width: 10, height: 10);
+              },
+            ),
           ),
         ),
       );
