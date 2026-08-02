@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.9] - 2026-08-02
+
+### Fixed
+
+- ([0e74bd0](https://github.com/evan361425/flutter-editor-ant/commit/0e74bd09b2619cac853684af94e5126e8dc21935)) placeholder parser allow custom on pressed only - @wu0dj2k7ao3
+
 ## [v1.3.8] - 2026-07-26
 
 ### Fixed
@@ -95,7 +101,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.8...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.9...HEAD
+[v1.3.9]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.8...v1.3.9
 [v1.3.8]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.7...v1.3.8
 [v1.3.7]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.6...v1.3.7
 [v1.3.6]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.5...v1.3.6
