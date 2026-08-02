@@ -9,15 +9,6 @@ PlaceholderPart _defaultOutPlaceholderParser(TextPlaceholder placeholder, Styled
     ? MenuPlaceholderPart(text: placeholder.id, meta: placeholder.meta, style: style)
     : PlaceholderPart(text: placeholder.id, style: style);
 
-TextPlaceholder _defaultInPlaceholderParser(PlaceholderPart placeholder) => placeholder is MenuPlaceholderPart
-    ? MenuPlaceholder(
-        id: placeholder.text,
-        text: placeholder.text,
-        meta: placeholder.meta,
-        onMenuSelected: (_) async => null,
-      )
-    : TextPlaceholder(id: placeholder.text, text: placeholder.text);
-
 extension AntPart on StyledEditingController<StyledText> {
   /// Converts the current text, styles, and placeholders in the controller to a list of [Part]s.
   List<StyledPart> toParts({OutPlaceholderParser placeholderParser = _defaultOutPlaceholderParser}) {
@@ -60,11 +51,22 @@ extension AntPart on StyledEditingController<StyledText> {
   /// Updates the controller's text, styles, and placeholders based on a list of [Part]s.
   void fromParts({
     required List<StyledPart> parts,
-    InPlaceholderParser placeholderParser = _defaultInPlaceholderParser,
+    InPlaceholderParser? placeholderParser,
+    Future<String?> Function(MenuPlaceholder<String?>)? onPlaceholderPressed,
   }) {
     final StringBuffer textBuffer = StringBuffer();
     final styles = <StyledText>[];
     final placeholders = <IndexPlaceholder>[];
+    final parser =
+        placeholderParser ??
+        (PlaceholderPart placeholder) => placeholder is MenuPlaceholderPart
+            ? MenuPlaceholder(
+                id: placeholder.text,
+                text: placeholder.text,
+                meta: placeholder.meta,
+                onMenuSelected: onPlaceholderPressed ?? (_) async => null,
+              )
+            : TextPlaceholder(id: placeholder.text, text: placeholder.text);
 
     StyledText? currentStyle;
     for (final part in parts) {
@@ -74,7 +76,7 @@ extension AntPart on StyledEditingController<StyledText> {
       if (part is PlaceholderPart) {
         textBuffer.write(TextPlaceholder.char);
         partStyle = part.style;
-        placeholders.add(IndexPlaceholder(start, placeholderParser(part)));
+        placeholders.add(IndexPlaceholder(start, parser(part)));
       } else {
         textBuffer.write(part.text);
         partStyle = part.style;
