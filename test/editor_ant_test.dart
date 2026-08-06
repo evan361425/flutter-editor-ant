@@ -216,6 +216,36 @@ void main() {
           textSpans,
         );
       });
+      testWidgets('turn off bold inside bold text', (WidgetTester tester) async {
+        await tester.pumpWidget(MyApp());
+        await tester.tap(find.byIcon(Icons.format_bold));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key('editor_ant.editor')), 'HelloWorld');
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byIcon(Icons.format_bold));
+        await tester.pumpAndSettle();
+        await TestAsyncUtils.guard<void>(() async {
+          await tester.showKeyboard(find.byKey(const Key('editor_ant.editor')));
+          tester.testTextInput.updateEditingValue(
+            TextEditingValue(text: 'Hello!World', selection: TextSelection.collapsed(offset: 6)),
+          );
+          await tester.idle();
+        });
+        await tester.pumpAndSettle();
+
+        final textSpans = getTextSpans(tester);
+        checkStyles(
+          ['Hello', '!', 'World'],
+          [
+            const TextStyle(fontWeight: FontWeight.bold),
+            const TextStyle(),
+            const TextStyle(fontWeight: FontWeight.bold),
+          ],
+          textSpans,
+        );
+      });
     });
     testWidgets('Change same format (e.g. bold) will toggle it', (WidgetTester tester) async {
       await tester.pumpWidget(MyApp());

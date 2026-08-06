@@ -9,7 +9,7 @@ void main() async {
     MyApp(
       fromTest: false,
       parts: [
-        {"type": "styled", "text": "EditorAnt", "color": 4294940672},
+        {"type": "styled", "text": "EditorAnt", "color": 4294940672, "isBold": true},
         {"type": "styled", "text": " is a "},
         {"type": "styled", "text": "dependency-free", "isItalic": true},
         {"type": "styled", "text": " editor leverages the "},

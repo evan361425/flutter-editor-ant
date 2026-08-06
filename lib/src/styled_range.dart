@@ -62,7 +62,7 @@ abstract class StyledRange<T extends StyledRange<T>> {
   /// - [start]: Optional new start position for the returned range
   /// - [end]: Optional new end position for the returned range
   /// - [toggle]: Whether to toggle the state based on [other]'s state
-  T toggleWith(T other, {int? start, int? end, bool toggle = true});
+  T toggleWith(T other, {int? start, int? end, ToggleState toggle = ToggleState.on});
 
   /// Combine this range with another range, return true only if both ranges
   /// have the same toggle state
@@ -82,4 +82,13 @@ abstract class Part<T extends StyledRange<T>> {
   const Part({this.style});
 
   Map<String, dynamic> toJson();
+}
+
+enum ToggleState {
+  // default and if style is fully covered by other style.
+  on,
+  // in collapsed range and just use the style.
+  off,
+  // style is not fully covered, just use the style.
+  none,
 }

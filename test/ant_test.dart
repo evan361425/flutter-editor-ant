@@ -60,6 +60,10 @@ void main() {
         isTrue,
       );
     });
+    test('nullableFactory', () {
+      expect(StyledText.nullableFactory(isBold: true), isNotNull);
+      expect(StyledText.nullableFactory(), isNull);
+    });
   });
 
   group('Buttons', () {

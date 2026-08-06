@@ -88,7 +88,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       return;
     }
 
-    final toggle = inProcess ? false : _isRangeToggleable(other, _styles.sublist(range[0], range[1]));
+    final toggle = inProcess ? ToggleState.off : _isRangeToggleable(other, _styles.sublist(range[0], range[1]));
     final result = _normalizeStyles(other, _styles.sublist(range[0], range[1]), toggle);
 
     _styles.removeRange(range[0], range[1]);
@@ -175,6 +175,9 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
 
       if (activeStyle.value?.range.isCollapsed == true) {
         final style = activeStyle.value!.copyWith(start: start, end: start + length);
+        if (EditorAntConfig.enableLogging) {
+          logging(activeStyle.value.toString(), 'InProcess');
+        }
         addStyle(style, inProcess: true);
         // Let _mergeStyles reset the active style
         activeStyle.value = null;
@@ -273,7 +276,7 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
   }
 
   /// Split existing styles and apply the new style [target].
-  List<T> _normalizeStyles(T target, List<T> others, bool toggle) {
+  List<T> _normalizeStyles(T target, List<T> others, ToggleState toggle) {
     final result = <T>[];
     for (final style in others) {
       if (style.inclusiveOf(target)) {
@@ -376,20 +379,21 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
   /// style.
   ///
   /// For example, if the target is bold from index 5 to 10, and there is an
-  /// existing style that is bold from index 0 to 15,  then the target is fully
-  /// styled.
+  /// existing style that is bold from index 0 to 15, then the target is fully
+  /// styled and toggleable.
   ///
   /// No need to consider connected styles here, as they are merged in [_mergeStyles].
-  bool _isRangeToggleable(T target, List<T> styles) {
+  ToggleState _isRangeToggleable(T target, List<T> styles) {
+    var state = ToggleState.none;
     if (target.range.isCollapsed) {
-      return false;
+      return state;
     }
 
     int covered = target.range.start;
     for (final style in styles) {
       if (target.hasSameToggleState(style)) {
         if (covered < style.range.start) {
-          return false;
+          return state;
         }
         covered = style.range.end;
       }
@@ -398,8 +402,9 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     final result = covered >= target.range.end;
     if (result && EditorAntConfig.enableLogging) {
       logging('true', 'Toggling');
+      state = ToggleState.on;
     }
-    return result;
+    return state;
   }
 
   /// Find the current pointed style based on the cursor position.

@@ -94,13 +94,17 @@ class StyledText extends StyledRange<StyledText> {
   }
 
   @override
-  StyledText toggleWith(StyledText other, {int? start, int? end, bool toggle = true}) {
+  StyledText toggleWith(StyledText other, {int? start, int? end, ToggleState toggle = ToggleState.on}) {
     return StyledText(
       range: TextRange(start: start ?? range.start, end: end ?? range.end),
-      isBold: other.isBold ? !isBold || !toggle : isBold,
-      isItalic: other.isItalic ? !isItalic || !toggle : isItalic,
-      isStrikethrough: other.isStrikethrough ? !isStrikethrough || !toggle : isStrikethrough,
-      isUnderline: other.isUnderline ? !isUnderline || !toggle : isUnderline,
+      isBold: other.isBold ? !isBold || toggle != ToggleState.on : isBold && toggle != ToggleState.off,
+      isItalic: other.isItalic ? !isItalic || toggle != ToggleState.on : isItalic && toggle != ToggleState.off,
+      isStrikethrough: other.isStrikethrough
+          ? !isStrikethrough || toggle != ToggleState.on
+          : isStrikethrough && toggle != ToggleState.off,
+      isUnderline: other.isUnderline
+          ? !isUnderline || toggle != ToggleState.on
+          : isUnderline && toggle != ToggleState.off,
       fontSize: other.fontSize ?? fontSize,
       color: other.resetColor ? null : (other.color ?? color),
     );
