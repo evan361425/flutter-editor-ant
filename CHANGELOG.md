@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.10] - 2026-08-06
+
+### Fixed
+
+- ([9835131](https://github.com/evan361425/flutter-editor-ant/commit/9835131a7cac5c8ce2bdbfccf771ae5c33c4c3cc)) toggle off in styled range - @wu0dj2k7ao3
+
 ## [v1.3.9] - 2026-08-02
 
 ### Fixed
@@ -101,7 +107,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.9...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.10...HEAD
+[v1.3.10]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.9...v1.3.10
 [v1.3.9]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.8...v1.3.9
 [v1.3.8]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.7...v1.3.8
 [v1.3.7]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.6...v1.3.7
