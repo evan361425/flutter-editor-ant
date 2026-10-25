@@ -130,9 +130,11 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
       _placeholders.addAll(placeholders);
     }
 
+    // Ensure the selection is within the bounds of the new text
+    final safeOffset = text.length;
     value = value.copyWith(
       text: text,
-      selection: TextSelection.collapsed(offset: text.length),
+      selection: TextSelection.collapsed(offset: safeOffset),
       composing: TextRange.empty,
     );
   }
@@ -253,18 +255,26 @@ class StyledEditingController<T extends StyledRange<T>> extends TextEditingContr
     }
 
     for (final style in _styles) {
-      if (style.range.start < offset) {
+      if (style.range.end <= offset) {
         continue;
       }
-
-      // Add unstyled text before this span
-      if (currentIndex < style.range.start - offset) {
-        addSpan(currentIndex, style.range.start - offset);
+      if (style.range.start >= offset + text.length) {
+        break;
       }
 
-      addSpan(style.range.start - offset, style.range.end - offset, style.toTextStyle());
+      final spanStart = (style.range.start - offset).clamp(0, text.length);
+      final spanEnd = (style.range.end - offset).clamp(0, text.length);
 
-      currentIndex = style.range.end - offset;
+      // Add unstyled text before this span
+      if (currentIndex < spanStart) {
+        addSpan(currentIndex, spanStart);
+      }
+
+      if (spanEnd > spanStart) {
+        addSpan(spanStart, spanEnd, style.toTextStyle());
+      }
+
+      currentIndex = spanEnd;
     }
 
     // Add remaining unstyled text

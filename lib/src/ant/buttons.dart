@@ -307,13 +307,15 @@ class ColorSelector extends StatelessWidget {
                     // restored to what it was before the menu was opened before the action is
                     // executed.
                     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-                      FocusManager.instance.applyFocusChangesIfNeeded();
-                      effectiveEditorController.addStyle(
-                        StyledText(
-                          range: effectiveEditorController.selection,
-                        ).copyWith(color: color, resetColor: color == null),
-                      );
-                      effectiveEditorFocusNode?.requestFocus();
+                      if (context.mounted) {
+                        FocusManager.instance.applyFocusChangesIfNeeded();
+                        effectiveEditorController.addStyle(
+                          StyledText(
+                            range: effectiveEditorController.selection,
+                          ).copyWith(color: color, resetColor: color == null),
+                        );
+                        effectiveEditorFocusNode?.requestFocus();
+                      }
                     });
                     controller.close();
                   },
@@ -378,10 +380,12 @@ class TextAlignSelector extends StatelessWidget {
                   // restored to what it was before the menu was opened before the action is
                   // executed.
                   SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-                    FocusManager.instance.applyFocusChangesIfNeeded();
-                    value.value = alignment;
-                    StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
-                    onSelected?.call(alignment);
+                    if (context.mounted) {
+                      FocusManager.instance.applyFocusChangesIfNeeded();
+                      value.value = alignment;
+                      StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
+                      onSelected?.call(alignment);
+                    }
                   });
                   controller.close();
                 },
@@ -428,11 +432,13 @@ class PlaceholderSelector extends StatelessWidget {
             // restored to what it was before the menu was opened before the action is
             // executed.
             SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-              FocusManager.instance.applyFocusChangesIfNeeded();
-              final effectiveController = styledEditingController ?? StyledWrapper.of<StyledText>(context).controller;
-              effectiveController.addPlaceholder(placeholder.create());
-              StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
-              onSelected?.call(placeholder);
+              if (context.mounted) {
+                FocusManager.instance.applyFocusChangesIfNeeded();
+                final effectiveController = styledEditingController ?? StyledWrapper.of<StyledText>(context).controller;
+                effectiveController.addPlaceholder(placeholder.create());
+                StyledWrapper.maybeOf<StyledText>(context)?.focusNode?.requestFocus();
+                onSelected?.call(placeholder);
+              }
             });
             controller.close();
           },
