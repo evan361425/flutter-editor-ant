@@ -8,6 +8,12 @@ This document's format follow the context in [Keep a Changelog](https://keepacha
 
 Please check git diff.
 
+## [v1.3.11] - 2026-10-25
+
+### Fixed
+
+- ([0ad9304](https://github.com/evan361425/flutter-editor-ant/commit/0ad93048fd9455debe43ea0691829b53ac36ea7b)) style over text length should clamp it - @wu0dj2k7ao3
+
 ## [v1.3.10] - 2026-08-06
 
 ### Fixed
@@ -107,7 +113,8 @@ No content found.
 
 Initial release
 
-[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.10...HEAD
+[unreleased]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.11...HEAD
+[v1.3.11]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.10...v1.3.11
 [v1.3.10]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.9...v1.3.10
 [v1.3.9]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.8...v1.3.9
 [v1.3.8]: https://github.com/evan361425/flutter-editor-ant/compare/v1.3.7...v1.3.8
